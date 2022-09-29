@@ -98,3 +98,59 @@ Più è piena una tabella hash, più è facile avere conflitti, quindi devo tene
 **Sorting**: algoritmo più studiato. Libro, The Art of Computer Programming, ancora la bibbia per queste cose, uno dei sei volumi è "searching and sorting".
 La maggior parte hanno complessità medie di O(n log(n)). Python usa la funzione `sorted()` che in realtà è `timsort`, dall'autore dell'artimetica di python.
 "Quick sort with Hungarian, folk dance". Ci sono tutti i balletti.
+
+**Numpy and Scipy**: librerie utilizzate tantissimo, in genere per analisi dati. Sono importanti per moli grandi di dati.
+Costruzione di array multidimensionale.
+```python
+import numpy as np
+np.linspace(1, 10, 5) # 5 passi equispaziati da 1 a 10 
+np.geomspace(1, 10, 5) # 5 passi logaritmicamente spaziati da 1 a 10
+```
+Perché abbiamo bisogno degli array rispetto alle liste? siccome implementato in C, le cose sono implementate in vario modo, ma sono array omogenei. Dentro lo stesso array non possiamo mescolare due tipi diversi, mentre nelle liste non ho cose del genere.
+Qual è il vantaggio della limitazione dell'omogeneità?
+Perché posso gestire meglio la memoria: se so già quale tipo mi serve, posso metterli contigui in memoria, so quanto spazio devo allocare a priori, in generale è davvero comodo.
+Per le liste, `list_a + list_b` concatena le liste, invece se `np.array` somma i numeri come vettori! Perché ha senso per noi fisici.
+Questi array non sono molto fatti per aumentare o diminuire la propria dimensione, anzi in generale è efficiente per la gestione della memoria.
+Altra cosa fondamentale, **broadcast**. Vuol dire che su questi array posso fare operazioni molto più generali di banale somma. Moltiplicare membro a membro, fare operazioni membro a membro ha senso.
+`a.shape` è la dimensione degli array in numpy.
+`c = np.linspace(1, 16, 16),reshape((4, 4))` esempio di trasformazioni di array.
+La cosa più sorprendente è invece:
+```python
+a1 = np.array([1, 2])
+a2 = np,array([1, 2], [3, 4])
+a1 + a2 # somma il primo vettore a tutte le righe
+```
+Somma sulle regole di broadcast! Però se `a1` avesse lunghezza 3, non lo somma e esce errore: parte di broadcast della documentazione di numpy, ha conseguenze incredibili.
+Ogni volta che operiamo su array, l'operazione avviene in C. Numpy è una libreria con funzioni compilate e poi usate in python. C è molto più veloce di python. 
+Quindi se sostituisco loop in python con operazione fra array in numpy, è molto più veloce! ma di un fattore costante ma elevato, tipo fattore 100 che cambia molto nel tempo!
+```pyhton
+import numpy as np
+import time
+n = 1000000
+v1 = [i for i in range(n)]
+v2 = [i**2 for i in range(n)]
+
+s = 0
+t0 = time.time()
+for v1, v2 in zip(v1, v2): # zip serve per iterable array allo stetto tempo
+    s += v1 * v2
+elapsed_time = time.time()-t0
+
+print(s)
+print(elapsed_time)
+
+# se invece vettorizzo
+
+v1 = np.array(v1)
+v2 = np.array(v2)
+
+
+t0 = time.time()
+s = (v1 * v2).sum()
+elapsed_time = time.time()-t0
+
+print(s)
+print(elapsed_time)
+```
+**Vettorizzazione**: trasformazione da ciclo for a array. Python lento rispetto a compilato, MA. Se manipolo stringhe o cose web, chissene se lento per micro o millisecondi. Se processo moli significative di numeri è sensato!
+Se problema è complesso ma si può vettorizzare, la velocità è quella di C! Quindi parsing di file è facile ed ha i vantaggi di python e la velocità di C.
