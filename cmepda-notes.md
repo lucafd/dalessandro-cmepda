@@ -4,11 +4,9 @@ CONVERTI QUESTO FILE IN LATEX, CONVIENE!
 
 [TOC]
 
-## Basics
+## Basics, Python
 
-### Python
-
-#### lezione 2
+### Lezione 2
 
 "The Zen of Python" sembra una cosa strana però dà l'idea di buone pratiche di programmazione.
 Ora fa le convenzioni per scrivere codice ordinato.
@@ -19,9 +17,9 @@ Ok, ora ci sono le cose base delle variabili.
 
 **TODO** to be finished.
 
-#### lezione 3 29/09/2022
+### Lezione 3 29/09/2022
 
-##### correzione assegnamento
+#### Correzione assegnamento
 
 Un file `.py` lo chiamo modulo. Con i moduli ci posso fare cose: eseguirli o importarli in un altro modulo.
 Serve per distinguere se file invocato dall'interprete o se invocato da un altro modulo. Viene fatto con la variabile speciale che si chiama `'__main__'`. 
@@ -66,7 +64,7 @@ ascii_dict = {chr(i): 0 for i in range(128)}
 ```
 Il dizionario era la struttura dati giusta per risolvere questo assegnamento, e sarebbe stato più inefficiente la sincronizzazione.
 
-##### Algoritmica
+#### Algoritmica
 
 Che struttura dati devo usare? come rispondo a questa domanda.
 Definizione di algoritmo: serie di istruzioni. Deve essere scritta in modo non ambiguo! Usare l'algoritmo giusto modifica anche la scala dei tempi.
@@ -154,3 +152,366 @@ print(elapsed_time)
 ```
 **Vettorizzazione**: trasformazione da ciclo for a array. Python lento rispetto a compilato, MA. Se manipolo stringhe o cose web, chissene se lento per micro o millisecondi. Se processo moli significative di numeri è sensato!
 Se problema è complesso ma si può vettorizzare, la velocità è quella di C! Quindi parsing di file è facile ed ha i vantaggi di python e la velocità di C.
+
+### Lezione 04, lunedì 3/10/2022
+
+Lecture Basics 5 dalle slides della cartella git.
+
+### Lezione 05, giovedì 6/10/2022
+
+Lecture basic 6, dalle slides.
+Oggi invece delle slides proviamo a scivere il codice live.
+Scorsa volta introdotto che cos'è una classe e problemi specifici.
+Noi vogliamo una classe per gestire vettori in 2D, in vita vera c'è numpy ma questo è un esempio didattico.
+
+Operatore costruttore: `init` 
+
+```python
+import math
+
+class Vector2d:
+
+    "Class representing a Vector in 2 dimensions.
+    "
+
+    def __init__(self, x, y):
+        self.x = float(x) 
+        self.y = float(y) # necessario per irrobustire il codice e non fare casino
+    # ci definiamo un metodo per farci stampare le coordinate e vedere che abbia funzionato
+    def print_coordinates(self):
+        print(f'Vector2d({self.x:.3f}, {self.y:.3f})')
+        # quella che segue è una f string e python sostituisce il valore delle funzioni nella stringa.
+        # invece si poteva scriverr
+        print('Vector2d(%.3f, %.3f))' % {self.x, self.y})
+        # ne esiste un'altra ma non sono riuscito a copiarla
+    # qua definisco le funzioni modulo e somma mentre prima avevo solo la definizione di attributi e uso la funzione print che è un po' particolare
+    def module(self):
+        return math.sqrt(self.x**2+self.y**2)
+    
+    def add(self, other):
+        return Vector2d(self.x + other.x, self.y+other.y)
+
+if __name__ == '__main__':
+    v = Vector2d(0., 1.)
+    v.print_coordinates()
+    print('the module of v is: {v.module():.3f}')
+    v2 = Vector2d(1., 0.)
+    v3 = v.add(v2)# devo chamare la funzione add su v passando v2 come adder
+    v3.print_coordinates()
+```
+
+Quello fatto finora funziona ma non è comodo... tipo la funzione add non è una sintassi naturale, e in questa sintassi non c'è simmeetria fra v e v2 nella somma. Non è intuitivo che come funzione non simmetrica ho una simmetrica.
+Sia in python che in C++ esiste un modo per fare che gli operatori + e altri funzionano su classi!
+Come? metodi speciali con il doppio underscore, metodi magici o Dunder Methods.
+esempio? 
+
+```python
+def __add__(self, other):
+    return Vector2d(self.x + other.x, self.y+other.y)
+```
+
+Non è che ogni cosa che scriviamo funziona, ma i medodi magici sono codificati e sostituiscono le operazioni classiche.
+Descriviamone un'altro, tipo il modulo
+Potrebbe essere più elegante! con che metodo si fa? con `__abs__` che definisce il modulo.
+Ultimo, il print non è bellissimo, dato che vorrei `print(v)` scriva qualcosa. Se ora lo faccio, esce una cosa che dice è una classe e dove si trova sulla memoria.
+Si può definire un metodo magico che dice come questo oggetto vada convertito in una stringa.
+Non è flessibile come l'ho definito io, invece sarebbe meglio se ritornasse la stringa e basta, e poi lo decida il programmatore!
+come lo modifichi?
+
+```python
+def __str__(self):
+    return (f'Vector2d({self.x:.3f}, {self.y:.3f})')
+```
+quello che fa l'interprete quando trova print è cercare la funzione str, e se non c'è cerca la funzione `__repr__`, che è pensata per il debug:
+
+```python
+def __str__(self):
+    return (f'({self.x:.3f}, {self.y:.3f})')
+def __repr__(self):
+    return (f'Vector2d({self.x:.3f}, {self.y:.3f})')
+```
+
+tipo di differenza tipico.
+Se str non esiste, l'interprete cerca repr. Se non definita repr, questa viene definita di default con la cosa del nome dell'oggetto e dell'allocazione di memoria.
+
+Ad esempio, cosa c'è nel namespace di un oggetto lo fa la funzione `dir`. Se lo si fa da terminale escono tutti i metodi definiti dall'interprete in automatico.
+```python
+class Empty:
+    pass
+
+empty = Empty()
+dir(empty)
+```
+DocString (`__doc__`) è la cosa fra i doppi hyphen, per la documentazione.
+La funzione `help` invece dice la docstring, i metodi definiti e altro.
+In generale fare subito un buon metodo per stampare più informazioni possibili.
+Se uno vuole sostituire il metodo sottrazione, 
+```python
+def __sub__(self, other):
+    return Vector2d(self.x - other.x, self.y-other.y)
+```
+
+Possiamo sfruttare il metodo str delle tuple e riciclare nella nostra funzione `__str__`.
+Ad esempio:
+```python
+def __str__(self):
+    return str(tuple(self.x, self.y)) # non è necessario scrivere tuple!
+```
+Molto importante perché così ci si risparmia alcune cose, tipo definizione di oggetti. Potevo definire la funzione multiply come ho fatto con la somma, ma non ci piace.
+
+Le funzioni di moltiplicazione sono diverse e non abeliane! su che elemento agisce? non è detto che siano dello stesso tipo, lui comincia sempre dall'elemento a sinistra.
+Se scrivo `v*2` va a cercare il metodo giusto, invece se scrivo `2*v`, va a cercare il metodo `mul` per gli interi! ma non sa cosa fare in quel caso, ed allora per farlo funzionare introduciamo il metodo `rmul`. ! metodo cercato prima nell'elemento a sinistra, e se non c'è viene trovato per elemento a destra. Non fa la divisione perché possiamo cercarcela noi.
+```python
+def __mul__(self, scalar):
+    return Vector2d(scalar * self.x, scalar * self.y)
+def __rmul__(self, scalar):
+    # Right multiplication - because a * Vector is different from Vector * a
+    return self * scalar # We just call __mul__, no code duplication if it is already defined! This is if we want to make it abelian.
+```
+Se le operazioni sono *in-place* (cioè assegati sulla stessa variabile, cambiata a seguito dell'operazione), nel caso di `add` e `mul` posso usare `iadd` e `imul` e scrivo per gli attributi `self.x += other.x` e idem su `y` (equivalente se `*=`). Questo mi consente di implementare `+=` e `*=` sui vettori creati.
+Concettualmente diversa da quell'altra. Stiamo modificando il vettore self, quindi non è la stessa cosa!
+
+```python
+def __iadd__(self, other):
+    self.x += other.x
+    self.y += other.y
+    return self
+def __imul__(self, other):
+    self.x *= other.x
+    self.y *= other.y
+    return self
+```
+! ACHTUNG: devi sempre ritornare self, perché se no non so dove riassegnare la modifica fatta, se non lo ritorno ho perso il puntatore alla variabile. Se la funzione non ha un return, la funzione assegna il valore `None` alla variabile. Tutto quello che vedi agisce all'interno della funzione per tutta la classe.
+
+La definizione di questi metodi rispettano il criterio di minima sorpresa: il codice fa la cosa che uno si aspetta, la più ovvia.
+Il codice va scritto con nomi che riflettono quello che il codice fa, e ci sono tool che fa sì che quando viene chiamata la funzionalità è intuitivo cosa sto facendo. Buona norma scriverlo in modo che funzioni così.
+
+Tutti i metodi della classe hanno accesso a tutti gli attributi, come anche i metodi.
+
+Garbage collector: libera memoria nel sistema operativo di cose che non servono più.
+
+Ok altri metodi sono invece nel caso dei confronti fra le cose.
+Gli operatori definiti in questo caso sono `eq`, `ge`, `lt`, `gt`, `le`. Alcune cose tipo == sono già definite, e penso che faccia di confrontare le locazioni di memoria.
+
+```python
+def __eq__(self, other):
+    # Implement the ’==’ operator
+    return ((self.x, self.y) == (other.x, other.y))
+def __ge__(self, other):
+    # Implement the ’>=’ operator
+    return abs(self) >= abs(other)
+def __lt__(self, other):
+    # Implement the ’<’ operator
+    return abs(self) < abs(other)
+```
+In effetti, se si nota, l'utente potrebbe passarmi qualunque cosa al posto di x e y, e allora forse per irrobustirlo posso fare il cast del codice. L'ho modificato alla sorgente.
+Printarlo bello:
+```python
+def __repr__(self):
+    # We define __repr__ for showing the results nicely
+    class_name = type(self).__name__
+    return (’{}({}, {})’.format(class_name, self.x, self.y))
+```
+
+Un modo per evitare == errori con float, uso il medoto delle tuple, che è quello mostrato nel codice sopra.
+Ora gli ordinamenti mostrati sopra sono scelti a caso.
+La funzione maggiore sono `g` = greater, `l` = less, e poi `e` = or equal, e infine `t` = than.
+Si può definire anche la funzione sort, ma per farla:
+```python
+# Tho make the following line work we need to implement either __ge__ and __lt__
+# or __gt__ and __le__ (we need a complementary pair of operator)
+vector_list.sort()
+```
+
+Adesso.
+
+**Hashing** dei vettori. Noi ne abbiamo sentito parlare per i dizionari. Noi vogliamo che sia qualcosa di hashabile.
+Deve avere qualche caratteristica, tipo:
+
+  - l'oggetto deve essere immutabile, se no cambia il suo valore! ad esempio stringhe o interi sono mutabili, mentre le liste no, ad esempio appendo un numero e simile. Se cambia, la sua hash function non ritorna più la stessa chiave.
+  - serve una `__eq__` function per paragonare elementi della stessa classe;
+  - ha bisogno di una funzione hash.
+
+Regole per una buona hash sono sulle slides. Il metodo è `__hash__`.
+
+Ok, adesso diciamo al programma che è read only, mettendo invece di `self.x` la funzione `self._x` e diventa privata. Ok posso anche pensare di modificare aggiungendo gli underscore ovunque, ma è non banale. 
+Uso allora le properties, cioè
+
+```python
+@property # è un decoratore, lo facciamo settimana prossima
+def x(self):
+    """ Provides read only access to x - since there is no setter"""
+    return self._x
+@property
+def y(self):
+    """ Provides read only access to y - since there is no setter"""
+    return self._y 
+```
+Questa cosa vale anche se il valore che ritorno me lo calcolo nella funzione, posso fare cose non per forza definite prima.
+
+Come cambia nelle funzioni di somma?
+Se la funzione è read only, abbiamo rotto le cose di somma. Se ci serve per una funzione di hash, dobbiamo rinunciare alla funzione di hash.
+Il fatto che esce una property _getter_ ma non esiste una property _setter_ dice all'interprete che non posso usarla. Come la passo?
+
+```python
+@x.setter
+def x(self, value):
+    self._x = float(value)
+```
+
+Ok, se ora ho setter, questo fa funzionare iadd. Sembra esserci duplicazione nel costruttore, dove all'inizio ho definito le cose. Allora come lo modifico eliminando tutto? anche nel costruttore ora posso scrivere
+```python
+def __init__(self, x, y):
+    self.x = x
+    self.y = y
+```
+Funziona!
+Il vero costruttore si chiama `new`, mentre `init` è un inizializzatore, quindi l'oggetto esiste già, e posso chiamare tutti i metodi e le proprietà.
+Ok però se metto il setter non è più read only, quindi non vedo il senso, tanto valeva lasciarla pubblica. Unico guadagno è che potessi convertirlo al float, invece prima lo controllavo solo nel costruttore: quando costruivo doveva essere ragionevole, mentre dopo potevo cambiarlo a qualunque cosa. 
+Così invece no.
+
+Noi non vogliamo il setter ora, vogliamo che sia tutto read only.
+
+Che funzioni di hash sono buone? Boh si ricicla quella dei reali di python:
+```python
+def __hash__(self):
+    """ As hash value we provide the logical XOR of the hash of 
+    the two coordinates """
+    return hash(self.x) ^ hash(self.y)
+```
+
+##### Array
+
+Perché un array di numpy è meglio di usare le liste? perché non posso definire una classe con liste? Liste non sono pensate per fare operazioni matematiche, sono lente.
+Una lista in python è una lista di puntatori, non è garantita la contiguità in memoria, ed ha un impatto sulle performances!
+Se ho due array, contigui in memoria, sono tutti un blocco, e il processore recupera da un unico accesso alla ram tutti gli elementi che gli servono e li mette nella cache del processore.
+Risparmia il tempo tantissimo, perché accesso dati da cache a processore è molto veloce.
+Quindi, salviamo il nostro vettore come array da lib di python. 
+Ora uso la composizione, cioè salvo come oggetto di una classe l'oggetto di un'altra classe.
+In python, gli array nativi vanno specificati il tipo di dato da salvare.
+Siccome in questa classe dobbiamo rappresentare solo numeri reali, questo typecode ce lo possiamo salvare solo come attributo della classe.
+Qual è la differenza? 
+Gli attributi della classe sono condivisi fra tutte le istanze della classe, non c'è self, e quindi scritto in un posto solo e prima di tutto.
+
+```python
+import math
+from array import array
+
+class Vector:
+    """ Classs representing a multidimensional vector"""
+    typecode = ’d’ #We use a class attribute to save the code required for array
+
+    def __init__(self, components):
+        self._components = array(self.typecode, components)
+        # quando accediamo agli attributi della classe, dobbiamo comunque accedere con self; posso anche scrivere Vector.typecode, però vabbè.
+
+    def __repr__(self):
+        """ Calling str() of an array produces a string like
+        array(’d’, [1., 2., 3., ...]). We remove everything outside the
+        square parenthesis and add our class name at the beginning."""
+        components = str(self._components) # prendo la stringa restituita
+        components = components[components.find(’[’): -1] # la manipolo per ottenere le cose formattate bene.
+        class_name = type(self).__name__
+        return ’{}({})’.format(class_name, components)
+
+    def __str__(self):
+        return str(tuple(self._components)) # Using str() of tuples as before
+        # perché mi piace molto come formattazione semplice.
+
+v = Vector([5., 3., -1, 8.])
+print(v)
+print(repr(v))
+
+#[Output]
+#(5.0, 3.0, -1.0, 8.0)
+#Vector([5.0, 3.0, -1.0, 8.0])
+```
+
+Vogliamo riciclare il metodo string del mio array di python per stampare. Il risultato non mi piace molto, perché scrive la stringa come nel commento. Allora, piuttosto proviamo a riscriverla meglio come si vede nel codice.
+
+Altra cosa più interessante. Ora, `_components` è privato e quindi non posso scrivere `v._components[0]`, ma vorrei `v[0]`. Esiste un metodo che lo fa da solo, che è 
+```python
+def __getitem__(self, index):
+    return self._components[index]
+```
+questo è il tipico esempio di composizione, nei metodi della mia classe uso metodi usati dall'altra classe, in questo caso l'array.
+Per impostare valore di variabili private:
+
+```python
+def __setitem__(self, index, value):
+    self._components[index] = value
+
+def __len__(self):
+    return len(self._components)
+```
+
+Quello non ancora implementato esplicitamente è iterare alla maniera delle liste, cioè vorrei poter scrivere:
+
+```python
+for element in v: 
+    print(element)
+```
+
+invece di 
+
+```python
+for i in range(len(v)):
+    print(v[i])
+```
+
+
+Ora, funziona già, e perché python è sveglio. In genere per funzionare si deve usare il metodo iter:
+
+```python
+def __iter__(self):
+    # deve restituire un iteratore, ma lo vedremo
+    # per ora che siamo pigri, un array della lib array è iterabile, e quindi ci facciamo restituire l'iteratore della variabile components
+    return iter(self._component)
+```
+
+che cos'è un iteratore? una cosa che ha un next che definisce le cose. 
+In genere non ha senso farlo perché posso sempre riciclare le cose da altre librerie.
+Perché funzionava però senza avere definito iter? beh avendo definito getitem e len, chiama in ordine tutti gli elementi dell'array.
+Perché vuoi definirlo esplicitamente? perché è meglio essere espliciti che impliciti. Vuoi che iterazione sia una cosa per cui la classe è pensata.
+Comoda l'iterazione perché così ogni volta che python si aspetta un iterabile possiamo mettere il nostro vettore! Moltissime volte funzioni accettano iterabili. Significa posso creare un vettore da un altro vettore per esempio perché accetta iterabili.
+Ad esempio se uso la funzione `zip` di python, che mi dà un elemento da ciascun iterabile alla volta (si ferma appena finisce l'iterabile più corto)
+
+```python
+for element1, element2 in zip(v1, v2):
+    print(element1, element2)
+```
+
+Concetto che si chiama _duck typing_. Non importa cosa sia un oggetto, ma importa cosa l'oggetto sa fare!
+
+> If it looks like a duck and quacks like a duck, it must be a duck.
+
+Purché implementino il metodo giusto, il codice funziona! non importa il nome della funzione basta che l'interfaccia ci sia. Ovviamente, anche la segnatura fa parte dell'interfaccia. Tutto quello che implementa il metodo iter, lo posso passare alle funzioni di python che si aspetta un iterabile, non importa il tipo ma solo l'interfaccia. Si chiama polimorfismo, è un concetto generale.
+In linguaggi fortemente tipizzati tipo c++ non si può fare il polimorfismo, mentre in python sì. Se linguaggio tipizzato, non si può. In python invece ci interessa solo se iterabile.
+In c++ il polimorfismo si fa con classi base che definiscono il concetto comune e da queste si fanno derivare le classi figlie.
+**Sulle slides pagina 24 ci sono le funzioni che accettano un elemento iterabile come input**.
+
+Una molto comoda, tutte le permutazioni due a due delle coppie, ma esiste già nella libreria `itertools`.
+
+Un esempio di come far funzionare la classe con iterabilità
+
+```python
+def __add__(self, other):
+    Vector([x+y for x, y in zip(self, other)])
+    # questo metodo per la creazione delle liste, crea una lista con la somma elemento per elemento dei due array.
+```
+
+Concetto identico per altre funzioni.
+```python
+def __abs__(self):
+    return math.hypot(*self._components)
+    # la cosa interessante era la funzone hypot, che faceva il modulo se vuoi
+```
+
+##### Funzioni
+Le funzioni sono classi, ognuna è un oggetto della classe function. Anche gli oggetti delle nostre classi possono comportarsi come funzioni... vogliamo fare sì che l'oggetto sia chiamabile da un metodo `__call__`. Vorrei qualcosa chiamabile con le tonde, e passare quella al fit. Nel corpo della classe posso fare cose più facili.
+Altra cosa che si può fare, un esempio è una funzione che conta il numero di chiamate.
+Come lo faccio? Creo un wrapper, aggiungo un layer di funzionalità intermedie.
+Un oggetto che prende come attributo una funzione.
+Per accettare tutti gli argomenti, `__call__(self, *args, **kwargs)`, dove i primi sono argomenti con il nome e il secondo argomenti senza nome.
+gli passo la funzione wrappata e curvefit, se gli arriva un chiamabile, non si la menta.
+Attenzione, curvefit va a vedere la lista degli argomenti per capire quanti ne deve fittare, a meno che gli passo p0 con 2 elementi. Quindi dobbiamo passargli per forza p0.
