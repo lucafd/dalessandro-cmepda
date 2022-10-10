@@ -515,3 +515,249 @@ Un oggetto che prende come attributo una funzione.
 Per accettare tutti gli argomenti, `__call__(self, *args, **kwargs)`, dove i primi sono argomenti con il nome e il secondo argomenti senza nome.
 gli passo la funzione wrappata e curvefit, se gli arriva un chiamabile, non si la menta.
 Attenzione, curvefit va a vedere la lista degli argomenti per capire quanti ne deve fittare, a meno che gli passo p0 con 2 elementi. Quindi dobbiamo passargli per forza p0.
+
+### Lezione 07, lunedì 10 ottobre 2022
+
+#### Testing and Documenting
+
+##### Testing
+
+Non c'è modo di sapere che sia sempre corretto il programma, e quindi per sua natura sarà non corretto o ci sarà un caso in cui si rompe.
+Quali sonon le tecniche per sapere all'incirca che il nostro programma sta facendo la cosa giusta?
+Molto difficile per un linguaggio interpretato come python. Se compilato certe verifiche le fa il compilatore, mentre se interpretato non lo sa nessuno a priori.
+Due attività:
+    - analisi statica della sintassi, analisi del codice e di verifiche della sintassi. **Pylint**, usalo!
+    - *unit testing*, test dell'unità. Isolare funzionalità il più possibile elementari, e verificare che quel pezzettino faccia la cosa giusta. Piccolo test, verificato in una cosa relativamente piccola ed ho una metrica che lo controlla. L'esempio non è per dire che in ogni caso fa la cosa giusta, ma vanno isolati i casi interessanti. Spezzo il codice in parti elementari. Le funzioni più sono piccole e focalizzate più sono fatte meglio. Va realizzato con una scelta oculata di funzioni e classi.
+
+**variabili d'ambiente**: sono la chiave per il funzionamento del sistema operativo. Su internet si trova. Scrivere un backslash in modo che sia un backslash davvero? `\\`.
+
+**Encoding**: modo di codificare i caratteri del sistema. Corrispondenza fra un glifo e un numero binario/esadecimale. Windows in automatico usa Latin1, non UTF-8. Errori di Unicode: codificare un file con un codice diverso da quello con cui è stato scritto.
+
+**TODO**: a casa leggi il questionario e cercati le cose che non sai e imparale.
+
+`assert`, è una parola riservata, valuta un espressione, se è vera non fa nulla, se è falsa genera un `AssertingError`. In generale non va usato mai l'assert, perché in caso di errore non posso modificarlo in corsa. Sensata solo quando si è certi del risultato e usato nel debugging.
+
+Per i test però non ha senso fare tanti piccoli test manuali, voglio trovare un modo generalissimo di farlo. All'aumentare della complessità del programma, capita che fai un cambiamento e questo cambiamento distrugge altre parti che interagiscono con il programma se fatto male.
+Se cresce organicamente con una serie di unit tests, riesce a crescere bene e senza rompersi.
+Una funzione deve incapsulare una funzione semplice e ben definita. Unit testing è assicurarsi che ogni pezzo faccia quello che deve fare.
+Un paradigma particolare è il Test-Driven Development (TDD): prima di scrivere la funzione scrivo il test, poi scrivo il corpo vuoto della funzione, e alla fine implemento la funzione fino a quando il test non passa. Verifica sempre che si può fare prima il test!
+Una cosa da convincere è che il test e la documentazione vanno fatti fin dall'inizio.
+Forzarsi a scrivere la documentazione e il test.
+
+Nell'esempio naïve delle slides, va sistemata la tipizzazione e i controlli su quello che viene passato. Vanno pensati i test per tutti i casi in cui viene usata.
+Io non voglio fare nulla a mano però, completamente inutile. Voglio allora usare qualche framework per gli unittest, in particolare `unittest`, oppure `pytest`. Oggi tutti usano la seconda ma non è detto si a più efficace.
+Test sono fatti in modo da poter runnare automaticamente. Nei test deve essere chiaro cosa voglio testare, e deve essere chiaro cosa voglio ottenere:
+
+```python
+import unittest
+
+def square(x):
+    """Function returning the suare of x.
+    In real life this would be in a differnt module!
+    """
+    return x**2.
+
+class TestSquare(unittest.TestCase):
+
+    def test(self):
+    """Dumb unit test---make sure that the square of 2. is 4.
+    """
+    self.assertAlmostEqual(square(2.), 4.) # usato almost equal per il discorso di float.
+
+if __name__ == ’__main__’:
+    unittest.main()
+```
+
+Se guardo un repo, ci sono due cartelle, test e docs. Ci sonon un certo numero di test. Il repo di esempio di github è `ixpeobssim` su github da lucabaldini.
+Tipicamente uno di questi test non leggi mai l'output. Ma passa da solo. Non devo essere io che la triggero. A me interessa solo quando fallisce, ed è il concetto di continuous integration, ed è il concetto di _Action_ su github.
+
+**TODO**: attaccare il repo ad un CI/CD.
+
+Poi fa pylint.
+
+Static typing/annotations, posso annotare le funzioni in modo che sappia che sono di un certo tipo. Però è per la leggibilità del codice, è solo annotazione.
+
+```python
+def square(x):
+    """Return the square of a number, but without annotations
+    """
+    return x**2.
+def annotated_square(x: float) -> float:
+    """Return the square of a number; this is the structure of an annotation.
+    It just increases legibility.
+    """
+    return x**2.
+```
+
+##### Documenting
+
+Le pagine di documentazione non sono fatte a mano. Basta vedere il link al codice sorgente della funzione. 
+Va notato che nella documentazione c'è il commento nella docstring.
+Documentazione vive dentro il codice, e il meccanismo di documentazione sono le docstrings, fra apici tripli.
+Non sono un posto dove le cose sono fatte a caso, ma permette a un tool automatico (sphynx) di generare automaticamente la documentazione.
+Quali argomenti prende in ingresso, cosa fa, qualunque cosa in cui dobbiamo stare attenti.
+How to use sphynx, learn it. `readthedocs` è open source.
+Fare il tag di una nuova versione?
+Automatizzare le cose, o lo sono automatiche o non succedono.
+Per il progetto finale ce lo si aspetta.
+
+#### Numpy and SciPy
+
+Introdotto il concetto di applicabilità all'array elemento per elemento, e il concetto di broadcasting, cioè fra array di dimensioni opportune posso eseguire operazioni artmetiche.
+`np.full((2,4), 3.)` fa una matrice 2x4 piena di soli tre.
+In generale le operazioni le fa elemento per elemento, anche il prodotto. Però devono avere la stesssa dimensione.
+Se hanno la stessa lunghezza, è ovvio moltiplicarlo, se con lunghezze diverse non è banale cosa significa.
+Se usi broadcasting e ci si ragiona bene, fattore 100 sulla velocità.
+`dir(object)` fornisce tutte le operazioni definite su quell'oggetto.
+
+Quali sono le regole del broadcasting? Sulla documentazione di Scipy. Sono complesse.
+
+##### Maschere
+
+Supponiamo che vogliamo vedere dove convertono i fotoni nel silicio, la lunghezza di assorbimento.
+
+```python
+import random
+import time
+import numpy as np
+import matplotlib.pyplot as plt
+
+N = 1000000 # numero di fotoni
+THICKNESS = 0.200 # mm, spessore del materiale del fotorilevatore
+
+lambda_ = 0.100 # mm, e lambda in realtà è riservata e quindi uso l'underscore per poter usare quel nome
+
+num_absorbed = 0.
+abs_z = []
+
+t0 = time.time()
+# abbiamo notato l'errore dalla fisica e notiamo cosa fa expovariate, quindi vuole 1/lambda e non lambda
+for i in range(N):
+    z = random.expovariate(1. / lambda_)
+    if z < THICKNESS:
+        num_assorbed += 1
+        abs_z.append(z)
+elapsed_time = time.time() - t0
+print(f'Running time: {elapsed_time}')
+
+quantum_efficiency = num_absorbed / N
+print(f'Quantum efficiency: {quantum_efficiency}')
+# me la aspetto circa 1-e^-2, quindi circa 90%, non così poca.
+
+plt.hist(abs_z, bins=100)
+plt.yscale('log')
+plt.show()
+```
+Questo programma lavora linearmente con N, quindi non è banale il fatto che voglia risparmiare di tempo... 
+Vettorizzare significa eliminare cicli for e sostituirlo con operazioni fra vettori. Quando possibile, questo fa la differenza come tempistiche.
+
+```python
+import random
+import time
+import numpy as np
+import matplotlib.pyplot as plt
+
+N = 1000000 # numero di fotoni
+THICKNESS = 0.200 # mm, spessore del materiale del fotorilevatore
+
+lambda_ = 0.100 # mm, e lambda in realtà è riservata e quindi uso l'underscore per poter usare quel nome
+def eff_simple():
+    abs_z = []
+    t0 = time.time()
+    for i in range(N):
+        z = random.expovariate(1. / lambda_)
+        if z < THICKNESS:
+            num_assorbed += 1
+            abs_z.append(z)
+    elapsed_time = time.time() - t0
+    print(f'Running time: {elapsed_time}')
+    return abs_z
+
+# ora vettorizziamo la funzione. Notiamo che numpy genera random in array, la numpy random.exponential
+def eff_vectorized(num_events):
+    # invece di generare un loop for, le genero tutte assieme, ma avviene in C e non in python che è lento.
+    abs_z = np.random.exponential(lambda_, size=num_events)
+    print(abs_z, len(z)) # questo solo di test per vedere che funziona.
+    # questa si chiama maschera
+    abs_z = abs_z[abs_z <= THICKNESS]
+    elapsed_time = time.time() - t0
+    print(f'Running time: {elapsed_time}')
+    return abs_z
+
+z = eff_simple(N)
+quantum_efficiency = len(z) / N
+print(f'Quantum efficiency: {quantum_efficiency}')
+# me la aspetto circa 1-e^-2, quindi circa 90%, non così poca.
+z = eff_vectorized(N)
+quantum_efficiency = len(z) / N
+print(f'Quantum efficiency: {quantum_efficiency}')
+#
+#plt.hist(abs_z, bins=100)
+#plt.yscale('log')
+#plt.show()
+```
+Lo slicing invece cos'è? e Indexing, cioè come si fa in Numpy a prendere sottoinsiemi di array. Comunque sulle slides c'è.
+
+Prima di tutto che cos'è una maschera? 
+```python
+import numpy as np
+
+a = np.random.uniform(size=10)
+mask = a > 0.5
+```
+In questo esempio, il nuovo array mask creato è un array con soli true e false, un array di booleani dove è scritto in ogni cella se è vera o falsa la condizione scritta.
+ma posso anche fare
+```python
+a[mask]
+```
+e questo, passando una maschera con parentesi quadre, restituisce un array in cui gli elementi presenti corrispondono ai true della maschera.
+
+Comunque si vede dal codice che è un risparmio notevole. Nella vita si fa questo, vettorizzo problemi che non si sanno fare altrimenti.
+Per esempio se su un immagine ho cose sensate. In generale siamo abituati ai loop, ma non è efficiente.
+Esempio di qualcosa di difficile da vettorizzare, nel mondo della fisica delle particelle.
+Se faccio assorbire un fotone nel silicio di 5 keV, se 3.6, sono circa 1500 in media di coppie generate. Qual è la varianza su questo? Non è una poissoniana, perché c'è un fenomeno che non conosco. 
+Siccome il numero non è fisso, questa è una cosa difficile da vettorizzare.
+
+Libreria importante è pandas, che può fare comodo.
+In generale leggere e scrivere file excel con python lo si fa con pandas.
+```python
+import pandas as pd
+```
+
+assignment basic 4
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+import scipy.interpolate import InterpolatedUnivariateSpline
+
+class ProbabilityDensityFunction(InterpolatedUnivariateSpline):
+    # in teoria potrei anche commentare tutto e fare pass, perché in pratica sto rinominando la funzione con il programma base.
+    def __init__(self, x, y):
+        """ Construct
+        """
+        super().__init__(x, y)
+
+if __name__ == '__main__':
+    x = np.linspace(0., np.pi, 20)
+    y = np.sin(x)
+    f = ProbabilityDensityFunction(x, y)
+
+    print(f.integral(0., np.pi) # le spline hanno il metodo integral, e così posso normalizzare
+
+    plt.plot(x, y, 'o')
+    _x = np.linspace(0., np.pi, 200)
+    plt.plot(_x, f(_x))
+
+# parte da griglia, e interpola da griglia una funzione.
+```
+
+Come si fa a generare un numero random? Primo metodo, hit or miss, e quindi da random uniforme creo coppie di punti e se y è sotto f(x) accetto x o meno.
+
+Altrimenti, uso la funzione cumulativa e la ppf (percent-point function). La cumulativa mappa il punto nel quantile, se ruoto invece di 90 gradi, la nuova funzione mappa il quantile nel suo valore.
+E se si prende un array random fra 0 e 1 e gli applico la ppf, avremo un array generato come la funzione di densità di probabilità. Si chiama inverse transform. L'abbiamo fatto a Analisi Statistica dei Dati. Esponenziale è un caso in cui la ppf si può generare analiticamente.
+**TODO**: capire cos'è una spline. una funzione interpolatrice. Queste funzioni sono facilmente integrabili e derivabili. Facilmente normalizzabili, la cdf è gratis per l'integrale, e allora per generare numeri random vanno generati fra 0 e 1, ci applico la ppf e ho finito.
+
+`splrand` sembra esserci più o meno un'implementazione davvero funzionante.
+
+Questo è complesso come assegnamento. Prendere come ispirazione.
