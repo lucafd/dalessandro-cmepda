@@ -944,3 +944,48 @@ with open(’snippets/data/fake_measurements.txt’) as lab_data_file:
             except ValueError as e:
                 print(’Line {} error: {}’.format(line_number, e))
 ```
+
+Consiglio su cosa va usato. Quantità di codice scritto in Fortran e C è enorme e usati ovunque, quindi c'è valore nel saper programmare in queste cose. Se cominci ora da zero a scrivere qualcosa, scrivilo in C++ o Python, ma saper programmare in Fortran ha un valore solo per il materiale che c'è in giro.
+Python puro è lento, ma ci sono molte librerie scritte in linguaggi compilati che consentono di fare cose velocemente. Ci sono cose che come tempo contano 0 e però ha tempo di sviluppo di molto.
+
+```python
+from splrand.pdf import ProbabilityDensityFuncion
+import numpy as np
+
+x = np.linspace(0., 1., 100)
+y = 2. * x
+pdf = ProbabilityDensityFunction(x, y)
+
+# ora non chiamo il costruttore, ma un oggetto creato, e che ha un metodo chiamato call
+pdf(0.5)
+> [Output]: array(1.)
+```
+
+Ad esempio, supponiamo di fare una classe, 
+
+```python
+
+class Dummy:
+
+    def __init__(self, name):
+        self.name = name
+
+if __name__ == '__main__':
+    d = Dummy('ciao')
+    print(d.name)
+    print(d(3))
+    # che succede? type error, perché non è chiamabile!
+```
+
+Questo metodo magico chiamato `__call__` è l'unico che consente di chiamare le cose, se lo aggiungo come 
+
+```python
+def __call__(self, value):
+    return value * 3.
+```
+
+Pagina sul data model di python, fra le varie cose abbiamo le basic customization, metodi magici che mimicano un certo numero di comportamenti dei tipi standard di python.
+Chiamare il costruttore della classe è una cosa, che restituisce l'istanza di una classe; a quel punto dipende se l'oggetto ha un metodo per essere chiamato.
+Sulla documentazione dice cosa succede per ogni metodo. Se non fai overload, il metodo della classe genitore viene utilizzato.
+Quando invece di fare i loop sulle funzioni, tutte fatte nella funzione max di python, basta dire come due oggetti si confrontano, molto più facile da leggere e meno difficile da sbagliare.
+Anche il [datamodel](https://docs.python.org/3/reference/datamodel.html) da avere come la bibbia.
