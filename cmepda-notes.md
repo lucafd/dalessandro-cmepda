@@ -761,3 +761,37 @@ E se si prende un array random fra 0 e 1 e gli applico la ppf, avremo un array g
 `splrand` sembra esserci più o meno un'implementazione davvero funzionante.
 
 Questo è complesso come assegnamento. Prendere come ispirazione.
+
+### Lezione 08 e laboratorio, giovedì 13 ottobre 2022
+
+#### Assegnamento 2
+
+Generare numeri random in due modi diversi, una con le spline functions, una per generare con l'inverso della fourier transform.
+Ora guardo la funzione da pdf.py e voglio vedere come calcolare la cdf. Fa vedere che sto applicando gli argomenti giusti e calcolo correttamente la cdf. 
+Unica cosa, non è detto che la lista che passo sia ordinata, quindi forse andrebbe specificato nella documentazione.
+La cdf non è difficile da calcolare, invertirla è un casino, è il calcolo della ppf.
+Se ho zone in cui prob è zero, allora ho problemi: la cdf sarà costante e allora nella spline gli passo valori tutti uguali, e per la spline è un casino.
+Come filtro un array?
+
+```python
+a = np.array([1., 2., 2., 3., 4., 4.])
+np.unique(a)
+# questo ritorna solo i valori unici della y, 
+np.unique(a, return_index = True)
+```
+
+Concettualmente, il debugging che faccio a mano sul codice ha senso farlo nell'unittest.
+Linea 69 del test, noti che se plotti con più punti, le discontinuità si fanno vedere! la spline non converge benissimo, perché di ordine 3...
+Se invece di farla di ordine tre la faccio di ordine 1, interpoli, è molto più bello
+In generale le funzioni discontinue vanno trattate in modo diverso... 
+Negli strumenti che costruiscono gli astronomi, hanno i bordi perché sono oltre il k_edge degli specchi in astronomia.
+
+La normalizzazione va fatta a mano? cioè va fatta automaticamente.
+fra la def di init e super(). Va rifatto a manina.
+
+```python
+norm = InterpolatedUnivariateSpline(x, y, k=k).integral(x[0], x[-1])
+y /= norm
+```
+
+**TODO** vedi a casa come si fa a vedere se l'array è ordinato.
