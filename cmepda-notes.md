@@ -795,3 +795,152 @@ y /= norm
 ```
 
 **TODO** vedi a casa come si fa a vedere se l'array è ordinato.
+
+#### Errori ed altro
+
+`Traceback` e il tipo di errore.
+Qua dice esattamente qual è il problema! Al contrario di git.
+`lecture_advanced_2`
+In C si ritorna codici di errore numerici, 0 tutto ok, numero diverso non ok.
+In Python si usa altro, il meccanismo delle eccezioni (exceptions).
+Nelle slides pagina tre c'è perché ha senso usare eccezioni e non flags.
+
+```python
+iterable_array[:5] # è lo slicing dell'array dalla posizione in 5 in poi
+```
+
+Se guardo la funzione `cut_before` implementata a pagina 4, noto che dà un errore molto chiaro.
+In python la filosofia di base è evitare di inventare. Ha senso. In generale posso inventarmi molte cose, molti modi di maneggiare, però fagli sputare l'errore direi che è la cosa migliore! Se la sottostringa non c'è, io gli ritorno il value error e lo sa che non sta passando.
+Come intercetto però un errore e gli dico che voglio fare qualcosa di specifico?
+Eccezioni.
+Cosa sono? È un oggetto, che eredita da una classe di oggetti.
+È `raised` quando lo segnalo che è andato male.
+Posso intercettare (`caught`) l'eccezione, e posso dire che con il meccanismo di TryExcept:
+
+```python
+def cut_before(input_string, substring):
+    try:
+        result = input_string[:(input_string.index(substring))]
+        print(’This line is not executed if an exception is raised in the try block’)
+        return result
+    # Catch the correct exception type with ’except’
+    except ValueError:
+        print(’This line is executed only if a ValueError is raised in the try block’)
+```
+
+Se non si sollevano eccezioni, siamo nel primo branch, se invece incontro un eccezione, andiamo nel branch except corrispondente. 
+Nota che l'except può essere eseguito in base al tipo di errore!
+Qual è la logica? Non crasha!! E continuo a fare cose se so che tipo di errore esce sempre.
+Si possono intercettare, e posso
+Ok, `except:` si può fare ma preferirei non farlo e specifico il tipo di errore.
+Tipico errore, try except KeyError, in generale dobbiamo intercettare l'errore nel modo più specifico possibile.
+Cioè, un conto è se manca la chiave, un conto è se manca tutto il dizionario!
+`else` e `finally` sono altri statement da usare.
+Se le cose fossero solo così, non sono molto meglio. Però in generale il trick è che l'errore manda indietro tutto l'oggetto, l'_eccezione_, e quindi passo tutte le informazioni che servono a ricostruire l'errore del file.
+Molto generale, in cui ci sono gerarchie di eccezioni molto ricche che consentono di fare la gestione degli errori.
+Pagina 10 c'è la gestione degli errori.
+`with`. Se lo facciamo in modo brutale, solo con open, lascia le cose incasinate, ma posso usare with che è più sicuro.
+
+```python
+try:
+    with open (’i_do_not_exist.txt’) as lab_data_file:
+        """ Do some process here...
+        """
+        pass
+
+except FileNotFoundError as e: # we assign a name to the the exception, e la passiamo e maneggiamo come un oggetto!!
+    print(e)
+
+# We can be less specific by catching a parent exception
+except OSError as e: # OSError is a parent class of FileNotFoundError
+    print(e)
+
+# catching Exception will catch almost everything!
+except Exception as e:
+    print(e)
+```
+
+Generalmente, non dovremmo mai chiamare `Exception` perché è troppo generale.
+Even worse, you should never catch for BaseException as that would even prevent the user for from aborting the execution with a KeyboardInterrupt (e.g. Ctrl-C).
+
+Asking permission: prima guardo se c'è il file e poi lo apro. In Python come costo computazionale è il contrario, è più facile provare e otterere l'errore che il contrario! Differenza filosofica grande. In C è il contrario.
+
+fare `if: else:` non conviene!
+
+Esiste il logging, non lo ha guardato.
+
+Possiamo sollevare eccezioni da noi!
+
+Ad esempio pagina 20 delle slides, `raise RuntimeError`
+Ricorda, in Python si può fare cose violente, tipo `sys.exit()`. Questa è un opzione, ma va valutata! Se metto l'uscita, non posso intervenire! Se invece uso l'errore, chi usa il codice e lo estende, ha l'opzione di estendere il codice e può intercettare e gestire l'eccezione. Sollevare l'opzione, lascia la scelta all'utente.
+
+Possiamo creare un eccezione in maniera granulare addirittura, con una classe appostita che eredita da `(Exception)`.
+
+Ad esempio, pagina 23 fa la value too large exception.
+Dove vanno intercettate le eccezioni il prima possibile!
+In generale le eccezioni vanno fatte subito, non mettendo un blocco grossissimo di funzione all'interno di un blocco tryexcept. I blocchi devono essere il più piccoli e specifici possibili.
+
+`split()` per stringa usata per separare cose.
+
+Ha fatto l'esempio di vario codice, e non torna! Bisogna imparare a capire dove cercare gli errori.
+
+Funzione che fa parsing di una singola linea. ! **si può iterare sui file**!
+
+Qua non ho nemmeno gestito l'errore, e vorrei invece sapere nel file quale linea è problematica.
+
+```python
+def parse_line(line):
+    """ Parse a line of the file and return the values as float"""
+    values = line.strip(’\n’).split(’ ’)
+    # the following two lines may generate exceptions if they fail!
+    time = float(values[0])
+    tension = float(values[1])
+    return time, tension
+
+with open(’snippets/data/fake_measurements.txt’) as lab_data_file:
+    for line in lab_data_file:
+        if not line.startswith(’#’): # skip comments
+            time, tension = parse_line(line)
+            print(time, tension)
+```
+
+Qua invece sto prendendo l'errore troppo presto, non passo info interessanti.
+
+```python
+def parse_line(line):
+    """ Parse a line of the file and return the values as float"""
+    values = line.strip(’\n’).split(’ ’)
+    try:
+        time = float(values[0])
+        tension = float(values[1])
+    except ValueError as e:
+        print(e) # This is not useful - which line of the file has the error?
+        return None # We can’t really return something meaningful
+    return time, tension
+
+with open(’snippets/data/fake_measurements.txt’) as lab_data_file:
+    for line in lab_data_file:
+        if not line.startswith(’#’): # skip comments
+            time, tension = parse_line(line)
+            print(time, tension) # This line still crash badly!
+```
+
+In questo caso è quello giusto da fare, così capisco anche la linea.
+
+```python
+def parse_line(line):
+""" Parse a line of the file and return the values as float"""
+    values = line.strip(’\n’).split(’ ’)
+    time = float(values[0])
+    tension = float(values[1])
+    return time, tension
+
+with open(’snippets/data/fake_measurements.txt’) as lab_data_file:
+    for line_number, line in enumerate(lab_data_file): # get the line number
+        if not line.startswith(’#’): # skip comments
+            try:
+                time, tension = parse_line(line)
+                print(time, tension)
+            except ValueError as e:
+                print(’Line {} error: {}’.format(line_number, e))
+```
