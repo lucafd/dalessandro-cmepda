@@ -1,25 +1,38 @@
-# Appunti di CMEPDA
+<!-- Appunti di CMEPDA -->
 
-CONVERTI QUESTO FILE IN LATEX, CONVIENE!
+**CONVERTI QUESTO FILE IN LATEX, CONVIENE!**
+- [Lezione 02, giovedì 23/09/2022 - Python Basics](#lezione-02-giovedì-23092022---python-basics)
+- [Lezione 03, giovedì 29/09/2022](#lezione-03-giovedì-29092022)
+  - [Correzione assegnamento](#correzione-assegnamento)
+  - [Algoritmica](#algoritmica)
+- [Lezione 04, lunedì 3/10/2022](#lezione-04-lunedì-3102022)
+- [Lezione 05, giovedì 6/10/2022](#lezione-05-giovedì-6102022)
+    - [Array](#array)
+    - [Funzioni](#funzioni)
+- [Lezione 07, lunedì 10/10/2022](#lezione-07-lunedì-10102022)
+  - [Testing and Documenting](#testing-and-documenting)
+    - [Testing](#testing)
+    - [Documenting](#documenting)
+  - [Numpy and SciPy](#numpy-and-scipy)
+    - [Maschere](#maschere)
+- [Lezione 08 e laboratorio, giovedì 13/10/2022](#lezione-08-e-laboratorio-giovedì-13102022)
+  - [Assegnamento 2](#assegnamento-2)
+  - [Errori ed altro](#errori-ed-altro)
 
-[TOC]
-
-## Basics, Python
-
-### Lezione 2
+# Lezione 02, giovedì 23/09/2022 - Python Basics
 
 "The Zen of Python" sembra una cosa strana però dà l'idea di buone pratiche di programmazione.
 Ora fa le convenzioni per scrivere codice ordinato.
-[https://peps.python.org/pep-0008/](https://peps.python.org/pep-0008/)
+[https://peps.python.org/pep-0008/](https://peps.python.org/pep-0008/):
 questo link serve come linea guita ma è tanto dettagliato, anche troppo non ti serve tutto questo.
 Sulle slides ci sono anche dei linters, ma vabbè.
 Ok, ora ci sono le cose base delle variabili.
 
 **TODO** to be finished.
 
-### Lezione 3 29/09/2022
+# Lezione 03, giovedì 29/09/2022
 
-#### Correzione assegnamento
+## Correzione assegnamento
 
 Un file `.py` lo chiamo modulo. Con i moduli ci posso fare cose: eseguirli o importarli in un altro modulo.
 Serve per distinguere se file invocato dall'interprete o se invocato da un altro modulo. Viene fatto con la variabile speciale che si chiama `'__main__'`. 
@@ -64,7 +77,7 @@ ascii_dict = {chr(i): 0 for i in range(128)}
 ```
 Il dizionario era la struttura dati giusta per risolvere questo assegnamento, e sarebbe stato più inefficiente la sincronizzazione.
 
-#### Algoritmica
+## Algoritmica
 
 Che struttura dati devo usare? come rispondo a questa domanda.
 Definizione di algoritmo: serie di istruzioni. Deve essere scritta in modo non ambiguo! Usare l'algoritmo giusto modifica anche la scala dei tempi.
@@ -121,7 +134,7 @@ a1 + a2 # somma il primo vettore a tutte le righe
 Somma sulle regole di broadcast! Però se `a1` avesse lunghezza 3, non lo somma e esce errore: parte di broadcast della documentazione di numpy, ha conseguenze incredibili.
 Ogni volta che operiamo su array, l'operazione avviene in C. Numpy è una libreria con funzioni compilate e poi usate in python. C è molto più veloce di python. 
 Quindi se sostituisco loop in python con operazione fra array in numpy, è molto più veloce! ma di un fattore costante ma elevato, tipo fattore 100 che cambia molto nel tempo!
-```pyhton
+```python
 import numpy as np
 import time
 n = 1000000
@@ -153,11 +166,11 @@ print(elapsed_time)
 **Vettorizzazione**: trasformazione da ciclo for a array. Python lento rispetto a compilato, MA. Se manipolo stringhe o cose web, chissene se lento per micro o millisecondi. Se processo moli significative di numeri è sensato!
 Se problema è complesso ma si può vettorizzare, la velocità è quella di C! Quindi parsing di file è facile ed ha i vantaggi di python e la velocità di C.
 
-### Lezione 04, lunedì 3/10/2022
+# Lezione 04, lunedì 3/10/2022
 
 Lecture Basics 5 dalle slides della cartella git.
 
-### Lezione 05, giovedì 6/10/2022
+# Lezione 05, giovedì 6/10/2022
 
 Lecture basic 6, dalle slides.
 Oggi invece delle slides proviamo a scivere il codice live.
@@ -380,7 +393,7 @@ def __hash__(self):
     return hash(self.x) ^ hash(self.y)
 ```
 
-##### Array
+### Array
 
 Perché un array di numpy è meglio di usare le liste? perché non posso definire una classe con liste? Liste non sono pensate per fare operazioni matematiche, sono lente.
 Una lista in python è una lista di puntatori, non è garantita la contiguità in memoria, ed ha un impatto sulle performances!
@@ -507,8 +520,8 @@ def __abs__(self):
     # la cosa interessante era la funzone hypot, che faceva il modulo se vuoi
 ```
 
-##### Funzioni
-Le funzioni sono classi, ognuna è un oggetto della classe function. Anche gli oggetti delle nostre classi possono comportarsi come funzioni... vogliamo fare sì che l'oggetto sia chiamabile da un metodo `__call__`. Vorrei qualcosa chiamabile con le tonde, e passare quella al fit. Nel corpo della classe posso fare cose più facili.
+### Funzioni
+Le **funzioni** sono classi, ognuna è un oggetto della classe function. Anche gli oggetti delle nostre classi possono comportarsi come funzioni... vogliamo fare sì che l'oggetto sia chiamabile da un metodo `__call__`. Vorrei qualcosa chiamabile con le tonde, e passare quella al fit. Nel corpo della classe posso fare cose più facili.
 Altra cosa che si può fare, un esempio è una funzione che conta il numero di chiamate.
 Come lo faccio? Creo un wrapper, aggiungo un layer di funzionalità intermedie.
 Un oggetto che prende come attributo una funzione.
@@ -516,11 +529,11 @@ Per accettare tutti gli argomenti, `__call__(self, *args, **kwargs)`, dove i pri
 gli passo la funzione wrappata e curvefit, se gli arriva un chiamabile, non si la menta.
 Attenzione, curvefit va a vedere la lista degli argomenti per capire quanti ne deve fittare, a meno che gli passo p0 con 2 elementi. Quindi dobbiamo passargli per forza p0.
 
-### Lezione 07, lunedì 10 ottobre 2022
+# Lezione 07, lunedì 10/10/2022
 
-#### Testing and Documenting
+## Testing and Documenting
 
-##### Testing
+### Testing
 
 Non c'è modo di sapere che sia sempre corretto il programma, e quindi per sua natura sarà non corretto o ci sarà un caso in cui si rompe.
 Quali sonon le tecniche per sapere all'incirca che il nostro programma sta facendo la cosa giusta?
@@ -589,7 +602,7 @@ def annotated_square(x: float) -> float:
     return x**2.
 ```
 
-##### Documenting
+### Documenting
 
 Le pagine di documentazione non sono fatte a mano. Basta vedere il link al codice sorgente della funzione. 
 Va notato che nella documentazione c'è il commento nella docstring.
@@ -601,7 +614,7 @@ Fare il tag di una nuova versione?
 Automatizzare le cose, o lo sono automatiche o non succedono.
 Per il progetto finale ce lo si aspetta.
 
-#### Numpy and SciPy
+## Numpy and SciPy
 
 Introdotto il concetto di applicabilità all'array elemento per elemento, e il concetto di broadcasting, cioè fra array di dimensioni opportune posso eseguire operazioni artmetiche.
 `np.full((2,4), 3.)` fa una matrice 2x4 piena di soli tre.
@@ -612,7 +625,7 @@ Se usi broadcasting e ci si ragiona bene, fattore 100 sulla velocità.
 
 Quali sono le regole del broadcasting? Sulla documentazione di Scipy. Sono complesse.
 
-##### Maschere
+### Maschere
 
 Supponiamo che vogliamo vedere dove convertono i fotoni nel silicio, la lunghezza di assorbimento.
 
@@ -762,9 +775,9 @@ E se si prende un array random fra 0 e 1 e gli applico la ppf, avremo un array g
 
 Questo è complesso come assegnamento. Prendere come ispirazione.
 
-### Lezione 08 e laboratorio, giovedì 13 ottobre 2022
+# Lezione 08 e laboratorio, giovedì 13/10/2022
 
-#### Assegnamento 2
+## Assegnamento 2
 
 Generare numeri random in due modi diversi, una con le spline functions, una per generare con l'inverso della fourier transform.
 Ora guardo la funzione da pdf.py e voglio vedere come calcolare la cdf. Fa vedere che sto applicando gli argomenti giusti e calcolo correttamente la cdf. 
@@ -796,7 +809,7 @@ y /= norm
 
 **TODO** vedi a casa come si fa a vedere se l'array è ordinato.
 
-#### Errori ed altro
+## Errori ed altro
 
 `Traceback` e il tipo di errore.
 Qua dice esattamente qual è il problema! Al contrario di git.
