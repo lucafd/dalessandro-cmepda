@@ -18,6 +18,10 @@
 - [Lezione 08 e laboratorio, giovedì 13/10/2022](#lezione-08-e-laboratorio-giovedì-13102022)
   - [Assegnamento 2](#assegnamento-2)
   - [Errori ed altro](#errori-ed-altro)
+- [Lezione 09, lunedì 17/10/2022](#lezione-09-lunedì-17102022)
+  - [Iteratori](#iteratori)
+  - [Generators](#generators)
+  - [Lambda functions](#lambda-functions)
 
 # Lezione 02, giovedì 23/09/2022 - Python Basics
 
@@ -1002,3 +1006,146 @@ Chiamare il costruttore della classe è una cosa, che restituisce l'istanza di u
 Sulla documentazione dice cosa succede per ogni metodo. Se non fai overload, il metodo della classe genitore viene utilizzato.
 Quando invece di fare i loop sulle funzioni, tutte fatte nella funzione max di python, basta dire come due oggetti si confrontano, molto più facile da leggere e meno difficile da sbagliare.
 Anche il [datamodel](https://docs.python.org/3/reference/datamodel.html) da avere come la bibbia.
+
+# Lezione 09, lunedì 17/10/2022
+
+## Iteratori
+
+Parlato di come si fa a rendere un oggetto iterabile alla python, che fa fare il ciclo for. Come si fa? si usa il metodo magico `__iter__`. Noi l'avevamo fatto riciclando il metodo `iter` della libreria `array`.
+Un iteratore ha implementato il metodo `__next__`. In pratica si sa qual'è il prossimo elemento da restituire. Chiamando l'oggetto, vi restituisce quello successivo. Quando è finita l'iterazione, deve sollevare un'eccezione chiamata `StopIteration()`.
+Perché devo implementare `iter` che usa `next` e devo implementare next? Perché così posso avere più iteratori attivi sullo stesso tipo di oggetto iterabile.
+Motivo per cui un iteratore è tecnicamente un iterabile, ma non il viceversa è sempre vero!
+Ora fa un esempio per capire che il ciclo for è equivalente a un ciclo infinito di chiamate fino a quando non esce l'eccezione:
+
+```python
+my_list = [1., 2., 3.]
+
+# For-loop syntax
+for element in my_list:
+    print(element)
+
+# This is equivalent (but much less readible and compact)
+list_iterator = iter(my_list)
+    while True:
+        try:
+            print(next(list_iterator))
+        except StopIteration:
+            break
+```
+
+Notiamo che se implementiamo `getitem` e `len` l'interprete si fa da sé l'iteratore.
+
+Il seguente metodo funziona per le liste e non per i dizionari perché non solleva il `KeyError`.
+
+```python
+class SimpleIterator:
+    """ Class implementing a super naive iterator"""
+    def __init__(self, container):
+        self._container = container
+        self.index = 0
+    
+    def __next__(self):
+        try:
+            # Note: here we are calling the __getitem__ method of self._container
+            item = self._container[self.index]
+        except IndexError:
+            raise StopIteration
+        self.index += 1
+        return item
+    def __iter__(self):
+        return self
+
+class SimpleIterable:
+    """ A very basic iterable """
+    def __init__(self, *elements):
+        # We use a list to store elements internally.
+        # This provide us with the __getitem__ function
+        self._elements = list(elements)
+    
+    def __iter__(self):
+        return SimpleIterator(self._elements)
+```
+
+Questo è un generatore basico. In generale posso fare iteratori a caso, tipo in `crazy_iterator` lo fa diverso e strano.
+
+Esistono metodi che dato un iterabile ritornano un singolo valore.
+
+Iteratori, sono utili da usare wrappando i container.
+Infine, gli iteratori operano su dati esistenti!
+
+## Generators
+
+Qualcosa che ad ogni interazione calcola il prossimo, per risparmiare memoria. Per calcolare qualcosa un attimo prima di usarla e non prima. 
+Un minimo di procrastinazione.
+Possiamo iterare su elementi che non esistono prima ma vengono calcolati mano mano. 
+Ci sono due modi, o con le _generator expressions_, o con le _generator functions_. In realtà nella vita vera le generatrici li dà python, ad esempio `range()` in python3.
+Una volta che abbiamo il generatore, possiamo usarlo per il for loop.
+
+```python
+for i in range(4): # generators act like iterators in for loop
+    print(i)
+
+data = [12, -1, 5]
+square_data_generator = (x**2 for x in data) # generator expression!
+# qua la differenza rispetto alle [] è che non viene calcolata o creata la lista, ma calcolato tutto solo dentro un loop.
+for square_datum in square_data_generator: # again, works like an iterator
+    print(square_datum)
+```
+
+Siccome la lista nell'esempio di sopra non è calcolata per intero prima, se modifico `data` in corso di loop, anche la generazione segue le modifiche della lista, dato che non è calcolata prima.
+
+la **funzione generatrice** è una funzione che si crea e dopo un po' c'è uno `yield`. Il risultato di quando lo creo è che viene restituito un generatore. 
+Il generatore è un oggetto che ha il metodo `next`. Che fa? esegue tutto il codice fino a `yield`, dove ritorna il valore che segue `yield`. Quando finisce solleva `StopIteration`.
+Di solito i generatori sono scritti con un loop all'interno.
+
+```python
+# Generator function that provides infinte fibonacci numbers
+def fibonacci():
+    a, b = 0, 1
+    while True:
+        yield a
+        a, b = b, a + b
+
+# We need to impose a stop condition externally to use it
+max_n = 7
+fib_numbers = []
+for i, fib in enumerate(fibonacci()):
+    if i >= max_n:
+        break
+    else:
+        fib_numbers.append(fib)
+print(fib_numbers)
+
+# Another way of doing that is using ’islice’ from itertools
+import itertools
+# Generator expression
+fib_gen = (fib for fib in itertools.islice(fibonacci(), max_n))
+print(list(fib_gen))
+```
+
+Qua la funzione `fibonacci()` non restituisce nulla, ma viene creato un oggetto tipo generatore e restituito. Quando poi lo uso, metto una condizione di stop esterna.
+Modo elegante è `.islice()` dalla libreria `itertools`. In pratica, crea con un generatore e un massimo, restituisce un iterabile. In generale, comunque, va notato come `fib_gen` non ho calcolato nulla, perché ho le parentesi tonde e non quadre.
+
+Il generatore serve quando voglio generare elementi in maniera lazy.
+Le funzioni generatrici di python sono davvero tantissime, la pagina 43 delle slides `lecture_advanced_2` ne elenca alcune e poi fa qualche esempio.
+
+Un metodo carino è il groupby, in generale si usa e c'è anche in pandas.
+
+## Lambda functions
+
+**Anonimous Functions** are a construct typical of functional programming, tipo _Lambda calculus_.
+In Python, crea una funzione in corsa senza dargli un nome. Sono limitate a espressioni singole, ritornate all'utente. Molti degli usi tipici della lambda function sono fatte dalle espressioni generatrici e _list comprehension_.
+
+la sintassi è 
+```python
+multiply = lambda x, y: x * y
+```
+Questa è una funzione a una riga, e quindi mi serve una funzione al volo e non la devo definire prima.
+
+`map` applica una funzione ad un iterabile.
+In generale il loro use case è coperto dal linguaggio normale.
+L'uso delle `lambda` è solo quando la funzione dopo è molto breve.
+
+L'esercizio di ricapitolazione finale aveva senso ma non è molto illuminante, dice che preferisce esercitazione, lui che scrive codice.
+
+Ora facciamo assignment advanced 2.
