@@ -1,25 +1,42 @@
-# Appunti di CMEPDA
+<!-- Appunti di CMEPDA -->
 
-CONVERTI QUESTO FILE IN LATEX, CONVIENE!
+**CONVERTI QUESTO FILE IN LATEX, CONVIENE!**
+- [Lezione 02, giovedì 23/09/2022 - Python Basics](#lezione-02-giovedì-23092022---python-basics)
+- [Lezione 03, giovedì 29/09/2022](#lezione-03-giovedì-29092022)
+  - [Correzione assegnamento](#correzione-assegnamento)
+  - [Algoritmica](#algoritmica)
+- [Lezione 04, lunedì 3/10/2022](#lezione-04-lunedì-3102022)
+- [Lezione 05, giovedì 6/10/2022](#lezione-05-giovedì-6102022)
+    - [Array](#array)
+    - [Funzioni](#funzioni)
+- [Lezione 07, lunedì 10/10/2022](#lezione-07-lunedì-10102022)
+  - [Testing and Documenting](#testing-and-documenting)
+    - [Testing](#testing)
+    - [Documenting](#documenting)
+  - [Numpy and SciPy](#numpy-and-scipy)
+    - [Maschere](#maschere)
+- [Lezione 08 e laboratorio, giovedì 13/10/2022](#lezione-08-e-laboratorio-giovedì-13102022)
+  - [Assegnamento 2](#assegnamento-2)
+  - [Errori ed altro](#errori-ed-altro)
+- [Lezione 09, lunedì 17/10/2022](#lezione-09-lunedì-17102022)
+  - [Iteratori](#iteratori)
+  - [Generators](#generators)
+  - [Lambda functions](#lambda-functions)
 
-[TOC]
-
-## Basics, Python
-
-### Lezione 2
+# Lezione 02, giovedì 23/09/2022 - Python Basics
 
 "The Zen of Python" sembra una cosa strana però dà l'idea di buone pratiche di programmazione.
 Ora fa le convenzioni per scrivere codice ordinato.
-[https://peps.python.org/pep-0008/](https://peps.python.org/pep-0008/)
+[https://peps.python.org/pep-0008/](https://peps.python.org/pep-0008/):
 questo link serve come linea guita ma è tanto dettagliato, anche troppo non ti serve tutto questo.
 Sulle slides ci sono anche dei linters, ma vabbè.
 Ok, ora ci sono le cose base delle variabili.
 
 **TODO** to be finished.
 
-### Lezione 3 29/09/2022
+# Lezione 03, giovedì 29/09/2022
 
-#### Correzione assegnamento
+## Correzione assegnamento
 
 Un file `.py` lo chiamo modulo. Con i moduli ci posso fare cose: eseguirli o importarli in un altro modulo.
 Serve per distinguere se file invocato dall'interprete o se invocato da un altro modulo. Viene fatto con la variabile speciale che si chiama `'__main__'`. 
@@ -64,7 +81,7 @@ ascii_dict = {chr(i): 0 for i in range(128)}
 ```
 Il dizionario era la struttura dati giusta per risolvere questo assegnamento, e sarebbe stato più inefficiente la sincronizzazione.
 
-#### Algoritmica
+## Algoritmica
 
 Che struttura dati devo usare? come rispondo a questa domanda.
 Definizione di algoritmo: serie di istruzioni. Deve essere scritta in modo non ambiguo! Usare l'algoritmo giusto modifica anche la scala dei tempi.
@@ -121,7 +138,7 @@ a1 + a2 # somma il primo vettore a tutte le righe
 Somma sulle regole di broadcast! Però se `a1` avesse lunghezza 3, non lo somma e esce errore: parte di broadcast della documentazione di numpy, ha conseguenze incredibili.
 Ogni volta che operiamo su array, l'operazione avviene in C. Numpy è una libreria con funzioni compilate e poi usate in python. C è molto più veloce di python. 
 Quindi se sostituisco loop in python con operazione fra array in numpy, è molto più veloce! ma di un fattore costante ma elevato, tipo fattore 100 che cambia molto nel tempo!
-```pyhton
+```python
 import numpy as np
 import time
 n = 1000000
@@ -153,11 +170,11 @@ print(elapsed_time)
 **Vettorizzazione**: trasformazione da ciclo for a array. Python lento rispetto a compilato, MA. Se manipolo stringhe o cose web, chissene se lento per micro o millisecondi. Se processo moli significative di numeri è sensato!
 Se problema è complesso ma si può vettorizzare, la velocità è quella di C! Quindi parsing di file è facile ed ha i vantaggi di python e la velocità di C.
 
-### Lezione 04, lunedì 3/10/2022
+# Lezione 04, lunedì 3/10/2022
 
 Lecture Basics 5 dalle slides della cartella git.
 
-### Lezione 05, giovedì 6/10/2022
+# Lezione 05, giovedì 6/10/2022
 
 Lecture basic 6, dalle slides.
 Oggi invece delle slides proviamo a scivere il codice live.
@@ -380,7 +397,7 @@ def __hash__(self):
     return hash(self.x) ^ hash(self.y)
 ```
 
-##### Array
+### Array
 
 Perché un array di numpy è meglio di usare le liste? perché non posso definire una classe con liste? Liste non sono pensate per fare operazioni matematiche, sono lente.
 Una lista in python è una lista di puntatori, non è garantita la contiguità in memoria, ed ha un impatto sulle performances!
@@ -507,8 +524,8 @@ def __abs__(self):
     # la cosa interessante era la funzone hypot, che faceva il modulo se vuoi
 ```
 
-##### Funzioni
-Le funzioni sono classi, ognuna è un oggetto della classe function. Anche gli oggetti delle nostre classi possono comportarsi come funzioni... vogliamo fare sì che l'oggetto sia chiamabile da un metodo `__call__`. Vorrei qualcosa chiamabile con le tonde, e passare quella al fit. Nel corpo della classe posso fare cose più facili.
+### Funzioni
+Le **funzioni** sono classi, ognuna è un oggetto della classe function. Anche gli oggetti delle nostre classi possono comportarsi come funzioni... vogliamo fare sì che l'oggetto sia chiamabile da un metodo `__call__`. Vorrei qualcosa chiamabile con le tonde, e passare quella al fit. Nel corpo della classe posso fare cose più facili.
 Altra cosa che si può fare, un esempio è una funzione che conta il numero di chiamate.
 Come lo faccio? Creo un wrapper, aggiungo un layer di funzionalità intermedie.
 Un oggetto che prende come attributo una funzione.
@@ -516,11 +533,11 @@ Per accettare tutti gli argomenti, `__call__(self, *args, **kwargs)`, dove i pri
 gli passo la funzione wrappata e curvefit, se gli arriva un chiamabile, non si la menta.
 Attenzione, curvefit va a vedere la lista degli argomenti per capire quanti ne deve fittare, a meno che gli passo p0 con 2 elementi. Quindi dobbiamo passargli per forza p0.
 
-### Lezione 07, lunedì 10 ottobre 2022
+# Lezione 07, lunedì 10/10/2022
 
-#### Testing and Documenting
+## Testing and Documenting
 
-##### Testing
+### Testing
 
 Non c'è modo di sapere che sia sempre corretto il programma, e quindi per sua natura sarà non corretto o ci sarà un caso in cui si rompe.
 Quali sonon le tecniche per sapere all'incirca che il nostro programma sta facendo la cosa giusta?
@@ -589,7 +606,7 @@ def annotated_square(x: float) -> float:
     return x**2.
 ```
 
-##### Documenting
+### Documenting
 
 Le pagine di documentazione non sono fatte a mano. Basta vedere il link al codice sorgente della funzione. 
 Va notato che nella documentazione c'è il commento nella docstring.
@@ -601,7 +618,7 @@ Fare il tag di una nuova versione?
 Automatizzare le cose, o lo sono automatiche o non succedono.
 Per il progetto finale ce lo si aspetta.
 
-#### Numpy and SciPy
+## Numpy and SciPy
 
 Introdotto il concetto di applicabilità all'array elemento per elemento, e il concetto di broadcasting, cioè fra array di dimensioni opportune posso eseguire operazioni artmetiche.
 `np.full((2,4), 3.)` fa una matrice 2x4 piena di soli tre.
@@ -612,7 +629,7 @@ Se usi broadcasting e ci si ragiona bene, fattore 100 sulla velocità.
 
 Quali sono le regole del broadcasting? Sulla documentazione di Scipy. Sono complesse.
 
-##### Maschere
+### Maschere
 
 Supponiamo che vogliamo vedere dove convertono i fotoni nel silicio, la lunghezza di assorbimento.
 
@@ -761,3 +778,374 @@ E se si prende un array random fra 0 e 1 e gli applico la ppf, avremo un array g
 `splrand` sembra esserci più o meno un'implementazione davvero funzionante.
 
 Questo è complesso come assegnamento. Prendere come ispirazione.
+
+# Lezione 08 e laboratorio, giovedì 13/10/2022
+
+## Assegnamento 2
+
+Generare numeri random in due modi diversi, una con le spline functions, una per generare con l'inverso della fourier transform.
+Ora guardo la funzione da pdf.py e voglio vedere come calcolare la cdf. Fa vedere che sto applicando gli argomenti giusti e calcolo correttamente la cdf. 
+Unica cosa, non è detto che la lista che passo sia ordinata, quindi forse andrebbe specificato nella documentazione.
+La cdf non è difficile da calcolare, invertirla è un casino, è il calcolo della ppf.
+Se ho zone in cui prob è zero, allora ho problemi: la cdf sarà costante e allora nella spline gli passo valori tutti uguali, e per la spline è un casino.
+Come filtro un array?
+
+```python
+a = np.array([1., 2., 2., 3., 4., 4.])
+np.unique(a)
+# questo ritorna solo i valori unici della y, 
+np.unique(a, return_index = True)
+```
+
+Concettualmente, il debugging che faccio a mano sul codice ha senso farlo nell'unittest.
+Linea 69 del test, noti che se plotti con più punti, le discontinuità si fanno vedere! la spline non converge benissimo, perché di ordine 3...
+Se invece di farla di ordine tre la faccio di ordine 1, interpoli, è molto più bello
+In generale le funzioni discontinue vanno trattate in modo diverso... 
+Negli strumenti che costruiscono gli astronomi, hanno i bordi perché sono oltre il k_edge degli specchi in astronomia.
+
+La normalizzazione va fatta a mano? cioè va fatta automaticamente.
+fra la def di init e super(). Va rifatto a manina.
+
+```python
+norm = InterpolatedUnivariateSpline(x, y, k=k).integral(x[0], x[-1])
+y /= norm
+```
+
+**TODO** vedi a casa come si fa a vedere se l'array è ordinato.
+
+## Errori ed altro
+
+`Traceback` e il tipo di errore.
+Qua dice esattamente qual è il problema! Al contrario di git.
+`lecture_advanced_2`
+In C si ritorna codici di errore numerici, 0 tutto ok, numero diverso non ok.
+In Python si usa altro, il meccanismo delle eccezioni (exceptions).
+Nelle slides pagina tre c'è perché ha senso usare eccezioni e non flags.
+
+```python
+iterable_array[:5] # è lo slicing dell'array dalla posizione in 5 in poi
+```
+
+Se guardo la funzione `cut_before` implementata a pagina 4, noto che dà un errore molto chiaro.
+In python la filosofia di base è evitare di inventare. Ha senso. In generale posso inventarmi molte cose, molti modi di maneggiare, però fagli sputare l'errore direi che è la cosa migliore! Se la sottostringa non c'è, io gli ritorno il value error e lo sa che non sta passando.
+Come intercetto però un errore e gli dico che voglio fare qualcosa di specifico?
+Eccezioni.
+Cosa sono? È un oggetto, che eredita da una classe di oggetti.
+È `raised` quando lo segnalo che è andato male.
+Posso intercettare (`caught`) l'eccezione, e posso dire che con il meccanismo di TryExcept:
+
+```python
+def cut_before(input_string, substring):
+    try:
+        result = input_string[:(input_string.index(substring))]
+        print(’This line is not executed if an exception is raised in the try block’)
+        return result
+    # Catch the correct exception type with ’except’
+    except ValueError:
+        print(’This line is executed only if a ValueError is raised in the try block’)
+```
+
+Se non si sollevano eccezioni, siamo nel primo branch, se invece incontro un eccezione, andiamo nel branch except corrispondente. 
+Nota che l'except può essere eseguito in base al tipo di errore!
+Qual è la logica? Non crasha!! E continuo a fare cose se so che tipo di errore esce sempre.
+Si possono intercettare, e posso
+Ok, `except:` si può fare ma preferirei non farlo e specifico il tipo di errore.
+Tipico errore, try except KeyError, in generale dobbiamo intercettare l'errore nel modo più specifico possibile.
+Cioè, un conto è se manca la chiave, un conto è se manca tutto il dizionario!
+`else` e `finally` sono altri statement da usare.
+Se le cose fossero solo così, non sono molto meglio. Però in generale il trick è che l'errore manda indietro tutto l'oggetto, l'_eccezione_, e quindi passo tutte le informazioni che servono a ricostruire l'errore del file.
+Molto generale, in cui ci sono gerarchie di eccezioni molto ricche che consentono di fare la gestione degli errori.
+Pagina 10 c'è la gestione degli errori.
+`with`. Se lo facciamo in modo brutale, solo con open, lascia le cose incasinate, ma posso usare with che è più sicuro.
+
+```python
+try:
+    with open (’i_do_not_exist.txt’) as lab_data_file:
+        """ Do some process here...
+        """
+        pass
+
+except FileNotFoundError as e: # we assign a name to the the exception, e la passiamo e maneggiamo come un oggetto!!
+    print(e)
+
+# We can be less specific by catching a parent exception
+except OSError as e: # OSError is a parent class of FileNotFoundError
+    print(e)
+
+# catching Exception will catch almost everything!
+except Exception as e:
+    print(e)
+```
+
+Generalmente, non dovremmo mai chiamare `Exception` perché è troppo generale.
+Even worse, you should never catch for BaseException as that would even prevent the user for from aborting the execution with a KeyboardInterrupt (e.g. Ctrl-C).
+
+Asking permission: prima guardo se c'è il file e poi lo apro. In Python come costo computazionale è il contrario, è più facile provare e otterere l'errore che il contrario! Differenza filosofica grande. In C è il contrario.
+
+fare `if: else:` non conviene!
+
+Esiste il logging, non lo ha guardato.
+
+Possiamo sollevare eccezioni da noi!
+
+Ad esempio pagina 20 delle slides, `raise RuntimeError`
+Ricorda, in Python si può fare cose violente, tipo `sys.exit()`. Questa è un opzione, ma va valutata! Se metto l'uscita, non posso intervenire! Se invece uso l'errore, chi usa il codice e lo estende, ha l'opzione di estendere il codice e può intercettare e gestire l'eccezione. Sollevare l'opzione, lascia la scelta all'utente.
+
+Possiamo creare un eccezione in maniera granulare addirittura, con una classe appostita che eredita da `(Exception)`.
+
+Ad esempio, pagina 23 fa la value too large exception.
+Dove vanno intercettate le eccezioni il prima possibile!
+In generale le eccezioni vanno fatte subito, non mettendo un blocco grossissimo di funzione all'interno di un blocco tryexcept. I blocchi devono essere il più piccoli e specifici possibili.
+
+`split()` per stringa usata per separare cose.
+
+Ha fatto l'esempio di vario codice, e non torna! Bisogna imparare a capire dove cercare gli errori.
+
+Funzione che fa parsing di una singola linea. ! **si può iterare sui file**!
+
+Qua non ho nemmeno gestito l'errore, e vorrei invece sapere nel file quale linea è problematica.
+
+```python
+def parse_line(line):
+    """ Parse a line of the file and return the values as float"""
+    values = line.strip(’\n’).split(’ ’)
+    # the following two lines may generate exceptions if they fail!
+    time = float(values[0])
+    tension = float(values[1])
+    return time, tension
+
+with open(’snippets/data/fake_measurements.txt’) as lab_data_file:
+    for line in lab_data_file:
+        if not line.startswith(’#’): # skip comments
+            time, tension = parse_line(line)
+            print(time, tension)
+```
+
+Qua invece sto prendendo l'errore troppo presto, non passo info interessanti.
+
+```python
+def parse_line(line):
+    """ Parse a line of the file and return the values as float"""
+    values = line.strip(’\n’).split(’ ’)
+    try:
+        time = float(values[0])
+        tension = float(values[1])
+    except ValueError as e:
+        print(e) # This is not useful - which line of the file has the error?
+        return None # We can’t really return something meaningful
+    return time, tension
+
+with open(’snippets/data/fake_measurements.txt’) as lab_data_file:
+    for line in lab_data_file:
+        if not line.startswith(’#’): # skip comments
+            time, tension = parse_line(line)
+            print(time, tension) # This line still crash badly!
+```
+
+In questo caso è quello giusto da fare, così capisco anche la linea.
+
+```python
+def parse_line(line):
+""" Parse a line of the file and return the values as float"""
+    values = line.strip(’\n’).split(’ ’)
+    time = float(values[0])
+    tension = float(values[1])
+    return time, tension
+
+with open(’snippets/data/fake_measurements.txt’) as lab_data_file:
+    for line_number, line in enumerate(lab_data_file): # get the line number
+        if not line.startswith(’#’): # skip comments
+            try:
+                time, tension = parse_line(line)
+                print(time, tension)
+            except ValueError as e:
+                print(’Line {} error: {}’.format(line_number, e))
+```
+
+Consiglio su cosa va usato. Quantità di codice scritto in Fortran e C è enorme e usati ovunque, quindi c'è valore nel saper programmare in queste cose. Se cominci ora da zero a scrivere qualcosa, scrivilo in C++ o Python, ma saper programmare in Fortran ha un valore solo per il materiale che c'è in giro.
+Python puro è lento, ma ci sono molte librerie scritte in linguaggi compilati che consentono di fare cose velocemente. Ci sono cose che come tempo contano 0 e però ha tempo di sviluppo di molto.
+
+```python
+from splrand.pdf import ProbabilityDensityFuncion
+import numpy as np
+
+x = np.linspace(0., 1., 100)
+y = 2. * x
+pdf = ProbabilityDensityFunction(x, y)
+
+# ora non chiamo il costruttore, ma un oggetto creato, e che ha un metodo chiamato call
+pdf(0.5)
+> [Output]: array(1.)
+```
+
+Ad esempio, supponiamo di fare una classe, 
+
+```python
+
+class Dummy:
+
+    def __init__(self, name):
+        self.name = name
+
+if __name__ == '__main__':
+    d = Dummy('ciao')
+    print(d.name)
+    print(d(3))
+    # che succede? type error, perché non è chiamabile!
+```
+
+Questo metodo magico chiamato `__call__` è l'unico che consente di chiamare le cose, se lo aggiungo come 
+
+```python
+def __call__(self, value):
+    return value * 3.
+```
+
+Pagina sul data model di python, fra le varie cose abbiamo le basic customization, metodi magici che mimicano un certo numero di comportamenti dei tipi standard di python.
+Chiamare il costruttore della classe è una cosa, che restituisce l'istanza di una classe; a quel punto dipende se l'oggetto ha un metodo per essere chiamato.
+Sulla documentazione dice cosa succede per ogni metodo. Se non fai overload, il metodo della classe genitore viene utilizzato.
+Quando invece di fare i loop sulle funzioni, tutte fatte nella funzione max di python, basta dire come due oggetti si confrontano, molto più facile da leggere e meno difficile da sbagliare.
+Anche il [datamodel](https://docs.python.org/3/reference/datamodel.html) da avere come la bibbia.
+
+# Lezione 09, lunedì 17/10/2022
+
+## Iteratori
+
+Parlato di come si fa a rendere un oggetto iterabile alla python, che fa fare il ciclo for. Come si fa? si usa il metodo magico `__iter__`. Noi l'avevamo fatto riciclando il metodo `iter` della libreria `array`.
+Un iteratore ha implementato il metodo `__next__`. In pratica si sa qual'è il prossimo elemento da restituire. Chiamando l'oggetto, vi restituisce quello successivo. Quando è finita l'iterazione, deve sollevare un'eccezione chiamata `StopIteration()`.
+Perché devo implementare `iter` che usa `next` e devo implementare next? Perché così posso avere più iteratori attivi sullo stesso tipo di oggetto iterabile.
+Motivo per cui un iteratore è tecnicamente un iterabile, ma non il viceversa è sempre vero!
+Ora fa un esempio per capire che il ciclo for è equivalente a un ciclo infinito di chiamate fino a quando non esce l'eccezione:
+
+```python
+my_list = [1., 2., 3.]
+
+# For-loop syntax
+for element in my_list:
+    print(element)
+
+# This is equivalent (but much less readible and compact)
+list_iterator = iter(my_list)
+    while True:
+        try:
+            print(next(list_iterator))
+        except StopIteration:
+            break
+```
+
+Notiamo che se implementiamo `getitem` e `len` l'interprete si fa da sé l'iteratore.
+
+Il seguente metodo funziona per le liste e non per i dizionari perché non solleva il `KeyError`.
+
+```python
+class SimpleIterator:
+    """ Class implementing a super naive iterator"""
+    def __init__(self, container):
+        self._container = container
+        self.index = 0
+    
+    def __next__(self):
+        try:
+            # Note: here we are calling the __getitem__ method of self._container
+            item = self._container[self.index]
+        except IndexError:
+            raise StopIteration
+        self.index += 1
+        return item
+    def __iter__(self):
+        return self
+
+class SimpleIterable:
+    """ A very basic iterable """
+    def __init__(self, *elements):
+        # We use a list to store elements internally.
+        # This provide us with the __getitem__ function
+        self._elements = list(elements)
+    
+    def __iter__(self):
+        return SimpleIterator(self._elements)
+```
+
+Questo è un generatore basico. In generale posso fare iteratori a caso, tipo in `crazy_iterator` lo fa diverso e strano.
+
+Esistono metodi che dato un iterabile ritornano un singolo valore.
+
+Iteratori, sono utili da usare wrappando i container.
+Infine, gli iteratori operano su dati esistenti!
+
+## Generators
+
+Qualcosa che ad ogni interazione calcola il prossimo, per risparmiare memoria. Per calcolare qualcosa un attimo prima di usarla e non prima. 
+Un minimo di procrastinazione.
+Possiamo iterare su elementi che non esistono prima ma vengono calcolati mano mano. 
+Ci sono due modi, o con le _generator expressions_, o con le _generator functions_. In realtà nella vita vera le generatrici li dà python, ad esempio `range()` in python3.
+Una volta che abbiamo il generatore, possiamo usarlo per il for loop.
+
+```python
+for i in range(4): # generators act like iterators in for loop
+    print(i)
+
+data = [12, -1, 5]
+square_data_generator = (x**2 for x in data) # generator expression!
+# qua la differenza rispetto alle [] è che non viene calcolata o creata la lista, ma calcolato tutto solo dentro un loop.
+for square_datum in square_data_generator: # again, works like an iterator
+    print(square_datum)
+```
+
+Siccome la lista nell'esempio di sopra non è calcolata per intero prima, se modifico `data` in corso di loop, anche la generazione segue le modifiche della lista, dato che non è calcolata prima.
+
+la **funzione generatrice** è una funzione che si crea e dopo un po' c'è uno `yield`. Il risultato di quando lo creo è che viene restituito un generatore. 
+Il generatore è un oggetto che ha il metodo `next`. Che fa? esegue tutto il codice fino a `yield`, dove ritorna il valore che segue `yield`. Quando finisce solleva `StopIteration`.
+Di solito i generatori sono scritti con un loop all'interno.
+
+```python
+# Generator function that provides infinte fibonacci numbers
+def fibonacci():
+    a, b = 0, 1
+    while True:
+        yield a
+        a, b = b, a + b
+
+# We need to impose a stop condition externally to use it
+max_n = 7
+fib_numbers = []
+for i, fib in enumerate(fibonacci()):
+    if i >= max_n:
+        break
+    else:
+        fib_numbers.append(fib)
+print(fib_numbers)
+
+# Another way of doing that is using ’islice’ from itertools
+import itertools
+# Generator expression
+fib_gen = (fib for fib in itertools.islice(fibonacci(), max_n))
+print(list(fib_gen))
+```
+
+Qua la funzione `fibonacci()` non restituisce nulla, ma viene creato un oggetto tipo generatore e restituito. Quando poi lo uso, metto una condizione di stop esterna.
+Modo elegante è `.islice()` dalla libreria `itertools`. In pratica, crea con un generatore e un massimo, restituisce un iterabile. In generale, comunque, va notato come `fib_gen` non ho calcolato nulla, perché ho le parentesi tonde e non quadre.
+
+Il generatore serve quando voglio generare elementi in maniera lazy.
+Le funzioni generatrici di python sono davvero tantissime, la pagina 43 delle slides `lecture_advanced_2` ne elenca alcune e poi fa qualche esempio.
+
+Un metodo carino è il groupby, in generale si usa e c'è anche in pandas.
+
+## Lambda functions
+
+**Anonimous Functions** are a construct typical of functional programming, tipo _Lambda calculus_.
+In Python, crea una funzione in corsa senza dargli un nome. Sono limitate a espressioni singole, ritornate all'utente. Molti degli usi tipici della lambda function sono fatte dalle espressioni generatrici e _list comprehension_.
+
+la sintassi è 
+```python
+multiply = lambda x, y: x * y
+```
+Questa è una funzione a una riga, e quindi mi serve una funzione al volo e non la devo definire prima.
+
+`map` applica una funzione ad un iterabile.
+In generale il loro use case è coperto dal linguaggio normale.
+L'uso delle `lambda` è solo quando la funzione dopo è molto breve.
+
+L'esercizio di ricapitolazione finale aveva senso ma non è molto illuminante, dice che preferisce esercitazione, lui che scrive codice.
+
+Ora facciamo assignment advanced 2.

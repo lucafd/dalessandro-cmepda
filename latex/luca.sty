@@ -1,0 +1,112 @@
+%%% Easy formatting of documents
+%\usepackage{fullpage}
+
+%%%===================%%%
+%%%% Fonts
+%\usepackage[euler-digits,euler-hat-accent]{eulervm}
+%\usepackage{palatino}
+%\usepackage[p,osf]{baskervillef}
+%\usepackage[cmintegrals,embraces]{newtxmath} %to add only if using the fontbelow
+%\usepackage{ebgaramond-maths}
+% other fonts interesting are eulervm, and sfmath for sans fonts,
+% and librebaskerville and inconsolata and gfsdidot
+
+%%%% Formatting 
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+%\usepackage[utf8x]{inputenc} % this version gets you in trouble with biblatex, don't use it if not needed, moreover you may try xelatex or lualatex
+\usepackage[italian]{babel}
+\usepackage[unicode=true]{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{multicol}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage{placeins}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{tikz}
+%\usepackage{pgf}
+\usepackage[nooldvoltagedirection]{circuitikz}
+\tikzset{
+	declare function={% in case of CVS which switches the arguments of atan2
+		atan3(\a,\b)=ifthenelse(atan2(0,1)==90, atan2(\a,\b), atan2(\b,\a));},
+	kinky cross radius/.initial=+.125cm,
+	@kinky cross/.initial=+, kinky crosses/.is choice,
+	kinky crosses/left/.style={@kinky cross=-},kinky crosses/right/.style={@kinky cross=+},
+	kinky cross/.style args={(#1)--(#2)}{
+		to path={
+			let \p{@kc@}=($(\tikztotarget)-(\tikztostart)$),
+			\n{@kc@}={atan3(\p{@kc@})+180} in
+			-- ($(intersection of \tikztostart--{\tikztotarget} and #1--#2)!%
+			\pgfkeysvalueof{/tikz/kinky cross radius}!(\tikztostart)$)
+			arc [ radius     =\pgfkeysvalueof{/tikz/kinky cross radius},
+			start angle=\n{@kc@},
+			delta angle=\pgfkeysvalueof{/tikz/@kinky cross}180 ]
+			-- (\tikztotarget)}}}
+%%%===================%%%
+%%%% Paragraph
+%\setlength{\parindent}{0pt}
+%\parskip = 2pt
+%\setlist{nosep}
+%\usepackage{noindentafter}
+%\usepackag5f9ef1216ed24c000149322ce{indentfirst}
+
+%%%===================%%%
+%%%% bibliography
+%\usepackage[autostyle,italian=guillemets]{csquotes}
+%\usepackage[backend=biber,style=numeric]{biblatex}
+
+%%%===================%%%
+%%%% mathematical format
+%==% symbols
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{mathrsfs}
+\usepackage{wasysym}
+\usepackage{accents}
+%==% stylistic preference
+%\renewcommand{\epsilon}{\varepsilon}
+%==% derivates and integrals
+\usepackage{commath}
+\usepackage{esint}
+%==% physics
+\usepackage{xfrac}
+\usepackage{siunitx}
+\sisetup{
+	per-mode=fraction,
+	fraction-function=\sfrac,
+	separate-uncertainty=true
+}
+%\usepackage{physics}
+
+%%%===================%%%
+%%%% graphics
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{wrapfig} %% per sistemare {r or R e invece per dire quante righe di testo wrappare, [nr righe] e niente poi aggiusta dentro con vspace
+\usepackage[export]{adjustbox}
+\usepackage{minted}
+% when you use minted, you have to make sure that Pygments package is installed in python, and that there is a call to the shell, like
+% pdflatex -shell-escape file.tex
+% while you compile.
+
+%%%===================%%%
+%%%% coding
+\usepackage{xifthen}
+\usepackage{xparse}
+%\hbadness=10000 % avoid visualiz. underfull-bad., doesn't modify their existence
+%\vbadness=10000 % evita vizualiz. underfull-bad., doesn't modify their existence
+
+%%%===================%%%
+%%%% Per la correzione
+\newcommand{\fixme}[1]{\marginpar{\tiny{\color{red} #1}}} % beside the text
+\newcommand{\todo}[1]{{\textcolor{red}{#1}}}                    % in line
+
+%%%===================%%%
+\newcommand{\bs}[1]{\boldsymbol{#1}} % for boldsymbol but easy and short
+
+%%% \boxed{formula} per includere le formule nelle box quadrate
