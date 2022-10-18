@@ -1149,3 +1149,4 @@ L'uso delle `lambda` è solo quando la funzione dopo è molto breve.
 L'esercizio di ricapitolazione finale aveva senso ma non è molto illuminante, dice che preferisce esercitazione, lui che scrive codice.
 
 Ora facciamo assignment advanced 2.
+Cosa sono i class methods? Cose usate per costruire istanze della classe che non sono self.
