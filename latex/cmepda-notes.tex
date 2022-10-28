@@ -11,6 +11,8 @@
 
 \tableofcontents
 
+% TODO qua va tweakata per bene minted per farlo uscire come piace a me la formattazione
+
 \chapter{Python Basics}
 
 \section{Lezione 2, giovedì 23 settembre 2022}
@@ -31,9 +33,73 @@ I link ai vari linters sono:
 }.
 
 
-Ok, ora ci sono le cose base delle variabili.
+Ok, ora ci sono le cose base delle variabili, cioè che tipo di variabili ci sono.
+% TODO lista di definizioni in latex formattati bene.
 
+\textbf{Variadic Functions} sono funzioni che accettano un numero variabile di argomenti. Come viene implementato?
 
+\begin{minted}{python}
+import os
+
+def join1(*args):
+	"""Horrible: do not use the + operator with strings in a loop.
+	"""
+	out = ’’
+	for arg in args:
+		out += ’%s/’ % arg
+	return out.rstrip(’/’)
+
+def join2(*args):
+	"""This a more sensible version---and you get the idea of the *.
+	"""
+	return ’/’.join(args)
+
+def join3(*args, sep=os.path.sep):
+	"""Even better---this will work on any OS.
+	"""
+	return sep.join(args)
+
+print(join1(’path’, ’to’, ’file’))
+print(join2(’path’, ’to’, ’file’))
+print(join3(’path’, ’to’, ’file’))
+\end{minted}
+
+Posso passare i parametri di un gruppo senza doverlo spacchettare, attraverso l'asterisco, come \texttt{*arrayName}.
+Infine qua fa una cosa tipo la definizione di \texttt{**kwargs} e come viene gestito: innanzitutto per essere definito, usa \mintinline{python}{kwargs.get('NameOfArg', option)} per definire il comportamento se si passa l'opzione \texttt{NameOfArg}. In effetti, poi, fa notare che \texttt{kwargs} sono molto diversi dagli argomenti posizionali.
+
+Definisce i control flow basici, tipo \texttt{for} loops, \texttt{while} loops, \texttt{if: elif: else:}.
+
+Infine, fornisce un esempio di iterazioni, ma tanto poi lo fa dopo gli iteratori per bene. Ci sono varie cose che si possono fare, ma tanto le spiega dopo, tipo l'uso di \texttt{enumerate} o di \texttt{zip}.
+
+\paragraph{Virgola mobile.} Infine fa la rappresentazione in virgola mobile: il segno ($s$, dove 0 è negativo e 1 è positivo), l'esponente ($e$, a 8 o 11 bit), mantissa (è $m$ a 23 o 52 bit) sono combinati insieme per fare $x=s\times m\times 2^{e-b}$. 
+The most significant bit is assumed to be 1, unless the exponent is 0.
+\textit{The representation of any floating point number is equivalent to
+the ratio of two integers, where the denominator is a power of 2}.
+Allora se voglio vedere la rappresentazione in interi interna di un float, usa il metodo \texttt{.as\_integer\_ratio()}.
+
+\subsection{Librerie}
+
+Ci sono tre livelli di gerarchia, il linguaggio standard di Python, le librerie standard e un'infinità di librerie di terze parti.
+Per usare una libreria, bisogna scrivere un \texttt{import} statement.
+Per modificare da dove importi le cose, dovrai giocare con il \textit{path} di Python e avere un file \mintinline{python}{__init__.py}.
+Alcune librerie utili:
+\begin{itemize}
+	\item \texttt{time}, \texttt{datetime} e \texttt{calendar} son utili per registrare il tempo di esecuzione di un programma e la data o simili anche se non sono banali;
+	\item \texttt{random}, \texttt{math} sono variabili numeriche.
+	\item \texttt{os}, \texttt{os.path}, \texttt{glob}, \texttt{shutil} sono librerie per fare operazioni sparse che si interfacciano con il sistema operativo, tipo accedere ai files, elencare le cose presenti in una cartella, i path relativi, eseguire comandi OS, e tutto compatibile su tutte le piattaforme;
+	\item \texttt{argparse} serve a sistemare per bene le opzioni da linea di comando, è importante;
+	\item \texttt{logging}, serve soprattutto per il debugging, che etichetta i vari messaggi con diversi livelli di gravità e imposta messaggi dinamici; va preferito all'inserimento di \mintinline{python}{print()} per il debugging.
+\end{itemize}
+
+Infine, guarda la struttura tipica di un pacchetto python. Nel pacchetto python si trova infatti:
+\begin{itemize}
+	\item \texttt{README.rst}
+	\item \texttt{LICENSE} (when in doubt use \texttt{GPLv3})
+	\item \texttt{requirements.txt} (dependencies, for \texttt{pip})
+	\item \texttt{sample} (actual python code, note it’s the same name as the project)
+	\item \texttt{docs} (documentation)
+	\item \texttt{tests} (unit tests)
+\end{itemize}
 
 \section{Lezione 3, giovedì 29 settembre 2022}
 
@@ -195,7 +261,9 @@ Se problema è complesso ma si può vettorizzare, la velocità è quella di C! Q
 
 \section{Lezione 4, lunedì 3 ottobre 2022}
 
-Lecture Basics 5 dalle slides della cartella git.
+\subsection{Object Oriented Programming}
+
+
 
 % TODO to be finished
 
