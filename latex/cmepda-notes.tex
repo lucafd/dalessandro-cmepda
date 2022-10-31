@@ -286,9 +286,149 @@ Se problema è complesso ma si può vettorizzare, la velocità è quella di C! Q
 
 \subsection{Object Oriented Programming}
 
-Basato sugli \textbf{oggetti}. Un oggetto è un'entità di codice che ha uno stato dove si conservano i dati, e un co
+Basato sugli \textbf{oggetti}. Un oggetto è un'entità di codice che ha uno stato dove si conservano i dati, e un comportamento, che sono le \textit{funzioni} o i \textit{metodi} dell'oggetto. 
+Molti oggetti sono sensatamente descritti come oggetti, tipo roba fisica e Graphical User Interface. Non sempre è la cosa giusta da usare\footnote{
+\url{https://en.wikipedia.org/wiki/Object-oriented_programming#Criticism}
+}.
 
-% TODO to be finished
+Attenzione che \texttt{C} non è \textit{object oriented}.
+
+Una classe è il progetto per un oggetto diciamo, mentre l'oggetto è la realizzazione pratica di una classe. Tipo la differenza fra il concetto di vettore numpy e la realizzazione di un vettore con un nome, tipo il vettore dei dati con il nome.
+La relazione è simile a \texttt{types} e \texttt{variables}, dove la variabile è una realizzazione pratica del tipo.
+
+In generale, lo stato di un oggetto è rappresentato dagli attributi (\texttt{attributes}) e il comportamento dai metodi (\texttt{methods}).
+Infine, ogni oggetto di una classe si chiama \textit{istanza} (\texttt{istance}) di quella classe.
+
+Convenzione sul nome della classe, sarebbe mettere il nome in maiuscolo.
+
+In Python, tutto è un oggetto di qualche classe, perfino gli interi, le stringhe, le liste sono classi; perfino le \textit{funzioni} sono classi!
+
+\paragraph{Methods.} Tutti i metodi della classi hanno l'istanza dell'oggetto come primo argomento. È abitudine chiamare questo argomento \texttt{self}, nonostante non sia richiesto dalle regole del linguaggio.
+Per accedere ad un metodo della classe, si usa l'operatore punto \texttt{`.`}; non va aggiunto l'argomento \texttt{self}, è aggiunto automaticamente.
+
+\paragraph{Namespaces.} Un \textit{namespace} è un dizionario di nomi unici, ognuno associato ad un oggetto. Si può accedere agli oggetti nello spazio locale dei nomi con il proprio nome, per altri serve l'operatore di chiamata, il punto. Lo spazio di visibilità di una variabile (ovvero se è solo locale, globale o \textit{built-in}) è detta \textit{scope}. 
+
+\paragraph{Attributes.} Gli attributi sono caratteristiche della classe, che possono essere aggiunti manualmente con un assegnazione, sempre utilizzando l'operatore punto per fare tutto. Se però lo aggiungo a mano, l'attributo viene assegnato solo ad un'istanza della classe, invece per aggiungerlo a tutte le istanze devo definirlo dentro la definizione generale.
+Non posso definirlo con il metodo ``aggiungi un attributo'' ogni volta, perché altrimenti ho da perderci e basta. Allora, per definirli, li inserisco nel \textbf{costruttore della classe}. È un metodo speciale chiamato ad ogni istanza, e in python si chiama \mintinline{python}{__init__}. Fa parte dei metodi speciali (o \textit{dunder methods}) circondati dai caratteri \texttt{\_\_}.
+C'è una differenza fra gli attributi di una classe e gli attributi di un'istanza: la prima e sostanziale è che gli attributi di una classe sono visibili da tutte le istanze, il viceversa non è vero. Inoltre, dato che gli attributi della classe non sono collegati ad un'istanza specifica, possono essere chiamati senza che venga creata una classe! Serve questo modo per creare costanti di classe, o valori di default, o dati condivisi da istanze diverse.
+
+\subsection{Encapsulation}
+
+Non ti interessa sapere cosa c'è dentro un oggetto per saperlo usare, perché ti basta saperne usare l'interfaccia.
+Per questo il concetto di incapsulazione è così importante: ``\textit{l'accesso e l'alterazione dello stato di un oggetto dovrebbe avvenire solo attraverso la sua interfaccia pubblica esposta}''.
+Serve per il debugging, per cui se ho un errore so che il problema è nel codice della classe. Posso anche forzare un comportamento per la classe.
+Ora, in generale posso accedere a tutti gli attributi con il punto, ma sembra rompere così l'incapsulazione. Per farla per bene, faccio la \textit{private encapsulation}. 
+In linguaggi particolari, tipo \texttt{C++} puoi dichiarare esplicitamente attributi e metodi privati, mentre in Python non puoi. Però la convenzione vuole che se ci metti prima del nome uno o due underscore, questo sia da considerarsi privato.
+È più un avvertimento per l'utente che altro. In realtà, nel caso di due trattini bassi (underscore) Python will prepend \texttt{\_classname} al nome effettivo dell'attributo. Ma in generale meglio non usarlo.
+Ad esempio, per capire meglio come funziona, vedi:
+\begin{minted}{python}
+class Television:
+	""" Class describing a televsion.
+	"""
+	def __init__(self, owner):
+		""" Class constructor"""
+		# Single underscore - tells the user he shouldn’t access the variable
+		# directly outside the class
+		self._model = ’Sv32X-553T’
+		# Double underscore - python will prepend _Television to the name
+		self.__owner = owner
+
+tv = Television(’Alberto’)
+# The following line is bad practice, but it’s technically possible
+print(tv._model)
+# Even with two underscores I can still access it if I know the "trick"
+print(tv._Television__owner)
+\end{minted}
+
+Se volessimo comunque fare in modo che l'utilizzatore possa modificare gli attributi, usiamo o i getter e i setter, oppure usiamo le \textit{properties}. Hanno un twist, consentono di accedere all'attributo con un operatore chiamata tipo punto.
+Invece di chiamare le variabili in modi diversi, tipo definire le espressioni private, possiamo scrivere
+\begin{minted}{python}
+@property
+def attribute_name(self):
+	return self.attribute 
+	#you can make modifications to the attribute, even operations!
+\end{minted}
+
+E per chiamare le properties, non servono le parentesi, cioè scrivo \mintinline{python}{v.attribute} invece di \mintinline{python}{v.attribute()}.
+L'altra proprietà è il setter, che serve per impostare le variabili da fuori:
+
+\begin{minted}{python}
+@AttributeName.setter # chiamata come una property
+def AttributeName(self, AttributeName)
+	#operations, do what you want
+\end{minted}
+
+Impostando il setter e il getter, posso fare in modo che alcuni attributi siano read-only, tipo quindi che se chiamati restituiscono cose diverse.
+Esempio illuminante:
+
+\begin{minted}{python}
+class Television:
+	""" Class describing a televsion.
+	"""
+	def __init__(self, owner):
+		""" Class constructor"""
+		self._owner = owner # owner is private
+	
+	@property
+	def owner(self):
+		return self._owner
+	
+	@owner.setter
+	def owner(self, new_owner):
+		""" Make the attribute read-only by acting on the setter"""
+		print('Nope {}. Do you want to steal my tv?'.format(new_owner))
+\end{minted}
+
+Perciò non per forza devi partire da attributi privati, ma puoi modificarli in corsa i codici, così da scrivere il codice che ti serve davvero.
+Anche l'interfaccia è importante. Ma non si applica al programma nella sua interezza e basta, ma anche a pezzi del programma: per esempio, per una classe è fatta da tutti i membri pubblici (ovvero attributi e metodi non privati).
+
+\subsection{Inheritance \& Composition}
+
+\paragraph{Inheritance.} Per evitare di duplicare un codice, il concetto di ereditarietà diventa utile. Una classe può ereditare da un'altra, ottenendo automaticamente tutte le sue funzionalità e poi estendendo o specializzandole.
+La classe da cui si eredita si chiama \textit{base class} o \textit{parent class} (in Python \textit{superclass}). La classe che eredita si chiama \textit{derived class} o \textit{child class}.
+Ovviamente, l'ereditarietà è transitiva. Non solo, ma si possono creare classi che ereditano da più classi genitrici.
+
+\begin{minted}{python}
+class AudioDevice:
+	def play(self, channel):
+		print(’You are listening to channel n. {}’.format(channel))
+
+class VideoDevice:
+	def play(self, channel):
+		print(’You are looking to channel n. {}’.format(channel))
+
+# Multiple inheritance!
+class Television(AudioDevice, VideoDevice):
+	def show(self, channel):
+		AudioDevice.play(self, channel)
+		VideoDevice.play(self, channel)
+\end{minted}
+
+Il concetto di eredità è complesso, e va usato per bene e va saputo quando usarla. Per questo va sempre tenuto a mente il Principio di Sostituzione di Liskov: \textit{you should always be able to use a derived class instead of a base class in your code}. In altre parole, una classe derivata dovrebbe estendere o specializzare le funzionalità di una classe base, mai restringerle!
+
+\paragraph{Composition.} Il concetto di composizione è un modo per usare le funzionalità di una classe in un'altra. Il concetto è semplice: usa un oggetto di una certa classe come membro di una classe diversa. 
+
+\begin{minted}{python}
+class Engine:
+	""" Class describing a fuel engine
+	"""
+	def start(self):
+		""" Start the engine """
+		print(’Broom broom!’)
+
+class Car:
+	"""Class describing a car.
+	"""
+	def __init__(self):
+		self.engine = Engine()
+	
+	def drive(self):
+		""" Start the car """
+		self.engine.start()
+\end{minted}
+
+I due modelli differiscono perché uno ha il modello di possesso (\textit{composition}, tipo l'auto ha un motore) mentre l'altro di essenza (\textit{inheritance}, tipo un elettrone è una particella). Non è ovvio come usarlo in generale, quale dei due sia meglio.
+
 
 \section{Lezione 5, giovedì 6 ottobre 2022}
 
@@ -686,8 +826,6 @@ Due attività:
 
 \textbf{Encoding}: modo di codificare i caratteri del sistema. Corrispondenza fra un glifo e un numero binario/esadecimale. Windows in automatico usa Latin1, non UTF-8. Errori di Unicode: codificare un file con un codice diverso da quello con cui è stato scritto.
 
-\textbf{TODO}: a casa leggi il questionario e cercati le cose che non sai e imparale.
-
 \mintinline{python}{assert}, è una parola riservata, valuta un espressione, se è vera non fa nulla, se è falsa genera un \texttt{AssertingError}. In generale non va usato mai l'assert, perché in caso di errore non posso modificarlo in corsa. Sensata solo quando si è certi del risultato e usato nel debugging.
 
 Per i test però non ha senso fare tanti piccoli test manuali, voglio trovare un modo generalissimo di farlo. All'aumentare della complessità del programma, capita che fai un cambiamento e questo cambiamento distrugge altre parti che interagiscono con il programma se fatto male.
@@ -721,6 +859,8 @@ if __name__ == ’__main__’:
 \end{minted}
 
 Se guardo un repo, ci sono due cartelle, \texttt{test} e \texttt{docs}. Ci sonon un certo numero di test. Il repo di esempio di github è `ixpeobssim` su github da lucabaldini.
+Per fare fare un test, uno dovrebbe scrivere sul terminale \mintinline{python}{python -m unittest programName} e farglielo fare, oppure creare un \texttt{Makefile} piccolino che lo faccia in automatico.
+
 Tipicamente uno di questi test non leggi mai l'output. Ma passa da solo. Non devo essere io che la triggero. A me interessa solo quando fallisce, ed è il concetto di continuous integration, ed è il concetto di \textit{Action} su github.
 
 **TODO**: attaccare il repo ad un CI/CD.
