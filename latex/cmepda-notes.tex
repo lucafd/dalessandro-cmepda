@@ -322,21 +322,35 @@ In linguaggi particolari, tipo \texttt{C++} puoi dichiarare esplicitamente attri
 È più un avvertimento per l'utente che altro. In realtà, nel caso di due trattini bassi (underscore) Python will prepend \texttt{\_classname} al nome effettivo dell'attributo. Ma in generale meglio non usarlo.
 Ad esempio, per capire meglio come funziona, vedi:
 \begin{minted}{python}
-class Television:
-	""" Class describing a televsion.
-	"""
-	def __init__(self, owner):
-		""" Class constructor"""
-		# Single underscore - tells the user he shouldn’t access the variable
-		# directly outside the class
-		self._model = ’Sv32X-553T’
-		# Double underscore - python will prepend _Television to the name
-		self.__owner = owner
+class Television:
 
-tv = Television(’Alberto’)
-# The following line is bad practice, but it’s technically possible
-print(tv._model)
-# Even with two underscores I can still access it if I know the "trick"
+	""" Class describing a televsion.
+
+	"""
+
+	def __init__(self, owner):
+
+		""" Class constructor"""
+
+		# Single underscore - tells the user he shouldn’t access the variable
+
+		# directly outside the class
+
+		self._model = ’Sv32X-553T’
+
+		# Double underscore - python will prepend _Television to the name
+
+		self.__owner = owner
+
+
+tv = Television(’Alberto’)
+
+# The following line is bad practice, but it’s technically possible
+
+print(tv._model)
+
+# Even with two underscores I can still access it if I know the "trick"
+
 print(tv._Television__owner)
 \end{minted}
 
@@ -362,20 +376,32 @@ Impostando il setter e il getter, posso fare in modo che alcuni attributi siano 
 Esempio illuminante:
 
 \begin{minted}{python}
-class Television:
-	""" Class describing a televsion.
-	"""
-	def __init__(self, owner):
-		""" Class constructor"""
-		self._owner = owner # owner is private
+class Television:
+
+	""" Class describing a televsion.
+
+	"""
+
+	def __init__(self, owner):
+
+		""" Class constructor"""
+
+		self._owner = owner # owner is private
+
 	
-	@property
-	def owner(self):
-		return self._owner
+	@property
+
+	def owner(self):
+
+		return self._owner
+
 	
-	@owner.setter
-	def owner(self, new_owner):
-		""" Make the attribute read-only by acting on the setter"""
+	@owner.setter
+
+	def owner(self, new_owner):
+
+		""" Make the attribute read-only by acting on the setter"""
+
 		print('Nope {}. Do you want to steal my tv?'.format(new_owner))
 \end{minted}
 
@@ -389,18 +415,28 @@ La classe da cui si eredita si chiama \textit{base class} o \textit{parent class
 Ovviamente, l'ereditarietà è transitiva. Non solo, ma si possono creare classi che ereditano da più classi genitrici.
 
 \begin{minted}{python}
-class AudioDevice:
-	def play(self, channel):
-		print(’You are listening to channel n. {}’.format(channel))
+class AudioDevice:
 
-class VideoDevice:
-	def play(self, channel):
-		print(’You are looking to channel n. {}’.format(channel))
+	def play(self, channel):
 
-# Multiple inheritance!
-class Television(AudioDevice, VideoDevice):
-	def show(self, channel):
-		AudioDevice.play(self, channel)
+		print(’You are listening to channel n. {}’.format(channel))
+
+
+class VideoDevice:
+
+	def play(self, channel):
+
+		print(’You are looking to channel n. {}’.format(channel))
+
+
+# Multiple inheritance!
+
+class Television(AudioDevice, VideoDevice):
+
+	def show(self, channel):
+
+		AudioDevice.play(self, channel)
+
 		VideoDevice.play(self, channel)
 \end{minted}
 
@@ -409,21 +445,34 @@ Il concetto di eredità è complesso, e va usato per bene e va saputo quando usa
 \paragraph{Composition.} Il concetto di composizione è un modo per usare le funzionalità di una classe in un'altra. Il concetto è semplice: usa un oggetto di una certa classe come membro di una classe diversa. 
 
 \begin{minted}{python}
-class Engine:
-	""" Class describing a fuel engine
-	"""
-	def start(self):
-		""" Start the engine """
-		print(’Broom broom!’)
+class Engine:
 
-class Car:
-	"""Class describing a car.
-	"""
-	def __init__(self):
-		self.engine = Engine()
+	""" Class describing a fuel engine
+
+	"""
+
+	def start(self):
+
+		""" Start the engine """
+
+		print(’Broom broom!’)
+
+
+class Car:
+
+	"""Class describing a car.
+
+	"""
+
+	def __init__(self):
+
+		self.engine = Engine()
+
 	
-	def drive(self):
-		""" Start the car """
+	def drive(self):
+
+		""" Start the car """
+
 		self.engine.start()
 \end{minted}
 
@@ -1439,15 +1488,34 @@ Ora facciamo assignment advanced 2.
 
 \subsection{Assignment Advanced 2}
 
+Questo è stato buona parte trattato nel file dell'assegnamento, con qualche aggiunta sul file in Markdown.
 
+\section{Advanced Python Features, the end}
+
+\subsection{Funzioni}
+
+Le funzioni sono oggetti di prima classe, significa che possono essere passati come argomenti ad altre funzioni e tornate come risultati da altre funzioni.
+Del resto le funzioni sono oggetti di una classe. E si può definire un'altra funzione dentro una funzione.
+
+Perché definire una funzione dentro una funzione? Ha senso, per esempio se devo tornarla come risultato della funzione.
+
+% TODO arrived at page 4/22 of advanced 3, to be finished
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Parallel Programming}
 
+Qua ci sono le lezioni dei giorni 20, 24, 27, 31 di ottobre.
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Machine Learning}
 
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{C++}
 
 
