@@ -15,6 +15,22 @@
 
 \chapter{Python Basics}
 
+\section{Lezione 1, lunedì 19 settembre 2022}
+
+\subsection{Introduzione al Corso}
+
+Corso per sviluppare in modo collaborativo e mantenibile, non è un corso di programmazione anche se in realtà ci assomiglia.
+Le lezioni di \texttt{C++} danno per scontato le basi, che vanno recuperate dal corso di programmazione \texttt{C}.
+L'esame è a progetto su cose relative al corso.
+
+\subsection{Controllo Versione}
+
+Ha tirato fuori i termini di \texttt{git}, non ha senso riportarli tutti qua, ci sono sulle slides.
+Ha spiegato che il controllo versione di una volta era diverso, venivano tracciati i file uno alla volta, invece in questo caso tutta la \texttt{repository} assieme. Si basa sostanzialmente sulla funzione di hashing, che è una funzione altamente mescolante che va da uno spazio a caso a uno spazio finito.
+Le proprietà di una funzione di hashing sono che è deterministica, che è uniforme nello spazio immagine, che è veloce da calcolare.
+Ovviamente, non è univoca dato che le dimensioni dello spazio non sono fissate e gli spazi sono a dimensione finita e sugli interi come campo. Deve ovviamente esistere un meccanismo che evita le collisioni.
+Per la versione, si ha che la struttura è \texttt{major.minor.patch}: ad esempio, Python \texttt{3.10.7}.
+
 \section{Lezione 2, giovedì 23 settembre 2022}
 
 \emph{The Zen of Python}, by Tim Peters, sembra una cosa strana però dà l'idea di buone pratiche di programmazione. Da leggere. Si richiama con \mintinline{python}{import this}.
@@ -48,13 +64,13 @@ def join1(*args):
 
 	"""
 
-	out = ’’
+	out='
 
 	for arg in args:
 
-		out += ’%s/’ % arg
+		out += '%s/' % arg
 
-	return out.rstrip(’/’)
+	return out.rstrip('/')
 
 
 def join2(*args):
@@ -63,7 +79,7 @@ def join2(*args):
 
 	"""
 
-	return ’/’.join(args)
+	return '/'.join(args)
 
 
 def join3(*args, sep=os.path.sep):
@@ -75,11 +91,11 @@ def join3(*args, sep=os.path.sep):
 	return sep.join(args)
 
 
-print(join1(’path’, ’to’, ’file’))
+print(join1('path', 'to', 'file'))
 
-print(join2(’path’, ’to’, ’file’))
+print(join2('path', 'to', 'file'))
 
-print(join3(’path’, ’to’, ’file’))
+print(join3('path', 'to', 'file'))
 \end{minted}
 
 Posso passare i parametri di un gruppo senza doverlo spacchettare, attraverso l'asterisco, come \texttt{*arrayName}.
@@ -117,7 +133,7 @@ Infine, guarda la struttura tipica di un pacchetto python. Nel pacchetto python 
 
 	\item \texttt{requirements.txt} (dependencies, for \texttt{pip})
 
-	\item \texttt{sample} (actual python code, note it’s the same name as the project)
+	\item \texttt{sample} (actual python code, note it's the same name as the project)
 
 	\item \texttt{docs} (documentation)
 
@@ -258,7 +274,7 @@ v2 = [i**2 for i in range(n)]
 s = 0
 t0 = time.time()
 for v1, v2 in zip(v1, v2): # zip serve per iterable array allo stetto tempo
-s += v1 * v2
+	s += v1 * v2
 elapsed_time = time.time()-t0
 
 print(s)
@@ -287,9 +303,8 @@ Se problema è complesso ma si può vettorizzare, la velocità è quella di C! Q
 \subsection{Object Oriented Programming}
 
 Basato sugli \textbf{oggetti}. Un oggetto è un'entità di codice che ha uno stato dove si conservano i dati, e un comportamento, che sono le \textit{funzioni} o i \textit{metodi} dell'oggetto. 
-Molti oggetti sono sensatamente descritti come oggetti, tipo roba fisica e Graphical User Interface. Non sempre è la cosa giusta da usare\footnote{
-\url{https://en.wikipedia.org/wiki/Object-oriented_programming#Criticism}
-}.
+Molti oggetti sono sensatamente descritti come oggetti, tipo roba fisica e Graphical User Interface. Non sempre è la cosa giusta da usare: si veda
+\url{https://en.wikipedia.org/wiki/Object-oriented_programming#Criticism} per maggiori dettagli.
 
 Attenzione che \texttt{C} non è \textit{object oriented}.
 
@@ -332,20 +347,20 @@ class Television:
 
 		""" Class constructor"""
 
-		# Single underscore - tells the user he shouldn’t access the variable
+		# Single underscore - tells the user he shouldn't access the variable
 
 		# directly outside the class
 
-		self._model = ’Sv32X-553T’
+		self._model = 'Sv32X-553T'
 
 		# Double underscore - python will prepend _Television to the name
 
 		self.__owner = owner
 
 
-tv = Television(’Alberto’)
+tv = Television('Alberto')
 
-# The following line is bad practice, but it’s technically possible
+# The following line is bad practice, but it's technically possible
 
 print(tv._model)
 
@@ -419,14 +434,14 @@ class AudioDevice:
 
 	def play(self, channel):
 
-		print(’You are listening to channel n. {}’.format(channel))
+		print('You are listening to channel n. {}'.format(channel))
 
 
 class VideoDevice:
 
 	def play(self, channel):
 
-		print(’You are looking to channel n. {}’.format(channel))
+		print('You are looking to channel n. {}'.format(channel))
 
 
 # Multiple inheritance!
@@ -455,7 +470,7 @@ class Engine:
 
 		""" Start the engine """
 
-		print(’Broom broom!’)
+		print('Broom broom!')
 
 
 class Car:
@@ -628,13 +643,13 @@ Ok altri metodi sono invece nel caso dei confronti fra le cose.
 Gli operatori definiti in questo caso sono \texttt{eq}, \texttt{ge}, \texttt{lt}, \texttt{gt}, \texttt{le}. Alcune cose tipo \texttt{==} sono già definite, e penso che faccia di confrontare le locazioni di memoria.
 \begin{minted}{python}
 def __eq__(self, other):
-	# Implement the ’==’ operator
+	# Implement the '==' operator
 	return ((self.x, self.y) == (other.x, other.y))
 def __ge__(self, other):
-	# Implement the ’>=’ operator
+	# Implement the '>=' operator
 	return abs(self) >= abs(other)
 def __lt__(self, other):
-	# Implement the ’<’ operator
+	# Implement the '<' operator
 	return abs(self) < abs(other)
 \end{minted}
 
@@ -644,7 +659,7 @@ Printarlo bello:
 def __repr__(self):
 	# We define __repr__ for showing the results nicely
 	class_name = type(self).__name__
-	return (’{}({}, {})’.format(class_name, self.x, self.y))	
+	return ('{}({}, {})'.format(class_name, self.x, self.y))	
 \end{minted}
 
 Un modo per evitare \texttt{==} errori con float, uso il medoto delle tuple, che è quello mostrato nel codice sopra.
@@ -736,7 +751,7 @@ from array import array
 
 class Vector:
 	""" Classs representing a multidimensional vector"""
-	typecode = ’d’ #We use a class attribute to save the code required for array
+	typecode = 'd' #We use a class attribute to save the code required for array
 
 	def __init__(self, components):
 		self._components = array(self.typecode, components)
@@ -744,12 +759,12 @@ class Vector:
 
 	def __repr__(self):
 		""" Calling str() of an array produces a string like
-		array(’d’, [1., 2., 3., ...]). We remove everything outside the
+		array('d', [1., 2., 3., ...]). We remove everything outside the
 		square parenthesis and add our class name at the beginning."""
 		components = str(self._components) # prendo la stringa restituita
-		components = components[components.find(’[’): -1] # la manipolo per ottenere le cose formattate bene.
+		components = components[components.find('['): -1] # la manipolo per ottenere le cose formattate bene.
 		class_name = type(self).__name__
-		return ’{}({})’.format(class_name, components)
+		return '{}({})'.format(class_name, components)
 
 	def __str__(self):
 		return str(tuple(self._components)) # Using str() of tuples as before
@@ -903,7 +918,7 @@ class TestSquare(unittest.TestCase):
 		"""
 		self.assertAlmostEqual(square(2.), 4.) # usato almost equal per il discorso di float.
 
-if __name__ == ’__main__’:
+if __name__ == '__main__':
 	unittest.main()	
 \end{minted}
 
@@ -1169,11 +1184,11 @@ Posso intercettare (\texttt{caught}) l'eccezione, e posso dire che con il meccan
 def cut_before(input_string, substring):
 	try:
 		result = input_string[:(input_string.index(substring))]
-		print(’This line is not executed if an exception is raised in the try block’)
+		print('This line is not executed if an exception is raised in the try block')
 		return result
-	# Catch the correct exception type with ’except’
+	# Catch the correct exception type with 'except'
 	except ValueError:
-		print(’This line is executed only if a ValueError is raised in the try block’)
+		print('This line is executed only if a ValueError is raised in the try block')
 \end{minted}
 
 Se non si sollevano eccezioni, siamo nel primo branch, se invece incontro un eccezione, andiamo nel branch except corrispondente. 
@@ -1191,7 +1206,7 @@ Pagina 10 c'è la gestione degli errori.
 
 \begin{minted}{python}
 try:
-	with open (’i_do_not_exist.txt’) as lab_data_file:
+	with open ('i_do_not_exist.txt') as lab_data_file:
 	""" Do some process here...
 	"""
 	pass
@@ -1243,15 +1258,15 @@ Qua non ho nemmeno gestito l'errore, e vorrei invece sapere nel file quale linea
 \begin{minted}{python}
 def parse_line(line):
 	""" Parse a line of the file and return the values as float"""
-	values = line.strip(’\n’).split(’ ’)
+	values = line.strip('\n').split(' ')
 	# the following two lines may generate exceptions if they fail!
 	time = float(values[0])
 	tension = float(values[1])
 	return time, tension
 
-with open(’snippets/data/fake_measurements.txt’) as lab_data_file:
+with open('snippets/data/fake_measurements.txt') as lab_data_file:
 	for line in lab_data_file:
-		if not line.startswith(’#’): # skip comments
+		if not line.startswith('#'): # skip comments
 			time, tension = parse_line(line)
 			print(time, tension)
 \end{minted}
@@ -1261,18 +1276,18 @@ Qua invece sto prendendo l'errore troppo presto, non passo info interessanti.
 \begin{minted}{python}
 def parse_line(line):
 	""" Parse a line of the file and return the values as float"""
-	values = line.strip(’\n’).split(’ ’)
+	values = line.strip('\n').split(' ')
 	try:
 		time = float(values[0])
 		tension = float(values[1])
 	except ValueError as e:
 		print(e) # This is not useful - which line of the file has the error?
-		return None # We can’t really return something meaningful
+		return None # We can't really return something meaningful
 	return time, tension
 
-with open(’snippets/data/fake_measurements.txt’) as lab_data_file:
+with open('snippets/data/fake_measurements.txt') as lab_data_file:
 	for line in lab_data_file:
-		if not line.startswith(’#’): # skip comments
+		if not line.startswith('#'): # skip comments
 			time, tension = parse_line(line)
 			print(time, tension) # This line still crash badly!
 \end{minted}
@@ -1282,19 +1297,19 @@ In questo caso è quello giusto da fare, così capisco anche la linea.
 \begin{minted}{python}
 def parse_line(line):
 	""" Parse a line of the file and return the values as float"""
-	values = line.strip(’\n’).split(’ ’)
+	values = line.strip('\n').split(' ')
 	time = float(values[0])
 	tension = float(values[1])
 	return time, tension
 
-with open(’snippets/data/fake_measurements.txt’) as lab_data_file:
+with open('snippets/data/fake_measurements.txt') as lab_data_file:
 	for line_number, line in enumerate(lab_data_file): # get the line number
-	if not line.startswith(’#’): # skip comments
+	if not line.startswith('#'): # skip comments
 		try:
 			time, tension = parse_line(line)
 			print(time, tension)
 		except ValueError as e:
-			print(’Line {} error: {}’.format(line_number, e))
+			print('Line {} error: {}'.format(line_number, e))
 \end{minted}
 
 Consiglio su cosa va usato. Quantità di codice scritto in Fortran e C è enorme e usati ovunque, quindi c'è valore nel saper programmare in queste cose. Se cominci ora da zero a scrivere qualcosa, scrivilo in C++ o Python, ma saper programmare in Fortran ha un valore solo per il materiale che c'è in giro.
@@ -1451,7 +1466,7 @@ for i, fib in enumerate(fibonacci()):
 		fib_numbers.append(fib)
 print(fib_numbers)
 
-# Another way of doing that is using ’islice’ from itertools
+# Another way of doing that is using 'islice' from itertools
 import itertools
 # Generator expression
 fib_gen = (fib for fib in itertools.islice(fibonacci(), max_n))
@@ -1499,9 +1514,59 @@ Del resto le funzioni sono oggetti di una classe. E si può definire un'altra fu
 
 Perché definire una funzione dentro una funzione? Ha senso, per esempio se devo tornarla come risultato della funzione.
 
-% TODO arrived at page 4/22 of advanced 3, to be finished
+Quando una funzione è creata all'interno di un'altra funzione ha accesso alle variabili locali della funzione esterna, anche se il suo scopo è esaurito. Questo è possibile perché le variabili sono tenute in uno speciale spazio di memoria, la \textbf{chiusura} della funzione interna.
+Queste variabili sono chiamate variabili libere: in questo modo, una funzione può mantenere uno stato dentro la sua chiusura. Questo consente di usare le funzioni per compiti che in altri linguaggi sono riservati alle classi.
 
+Ad esempio: 
 
+\begin{minted}{python}
+import numpy
+def rotate(x, y, theta):
+	""" Naive implementation. This works, but is inefficient - we have to
+	calculate cos(theta) and sin(theta) for each pair (x,y)! """
+	c = numpy.cos(theta)
+	s = numpy.sin(theta)
+	x_rot = c * x - s * y
+	y_rot = s * x + c * y
+	return x_rot, y_rot
+
+x, y = 1., 0.
+theta = numpy.pi/4
+print(rotate(x, y, theta)) # Rotation of pi/2
+
+def efficient_rotate(x, y, c_theta, s_theta):
+	""" Efficient rotation. The user gives cos and sin, so they are not
+	calculated for each pixel """
+	x_rot = c * x - s * y
+	y_rot = s * x + c * y
+	return x_rot, y_rot
+
+c = numpy.cos(theta)
+s = numpy.sin(theta)
+print(efficient_rotate(x, y, c, s)) # The syntax is very ugly!
+
+def create_rotator(theta):
+	""" Efficient rotation. Cosinus and sinus values are saved in the closure,
+	so that they are computed exactly once."""
+	c = numpy.cos(theta)
+	s = numpy.sin(theta)
+	def rotate(x, y):
+		x_rot = c * x - s * y
+		y_rot = s * x + c * y
+		return x_rot, y_rot
+	return rotate
+
+x, y = 1., 0.
+theta = numpy.pi/4
+rotate_by_theta = create_rotator(theta)
+print(rotate_by_theta(x, y))
+\end{minted}
+
+Si noti come la cosa più sensata è l'ultima ed è anche la più efficiente dal punto di vista del tempo computazionale.
+
+Una cosa a cui fare attenzione è che definendo una variabile libera dentro una funzione interna, in automatico viene creata una variabile locale; se voglio invece usarne una non locale, devo usare l'indicatore \texttt{nonlocal}. \textit{Explicit is better than implicit}.
+
+% TODO pagina 8/22 del file lecture advanced 3
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Parallel Programming}
