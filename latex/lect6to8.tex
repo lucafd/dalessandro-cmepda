@@ -1,0 +1,826 @@
+
+\section{Lezione 6, lunedì 10 ottobre 2022}
+
+\subsection{Testing and Documenting}
+
+\subsubsection{Testing}
+
+Non c'è modo di sapere che sia sempre corretto il programma, e quindi per sua natura sarà non corretto o ci sarà un caso in cui si rompe.
+Quali sonon le tecniche per sapere all'incirca che il nostro programma sta facendo la cosa giusta?
+Molto difficile per un linguaggio interpretato come python. Se compilato certe verifiche le fa il compilatore, mentre se interpretato non lo sa nessuno a priori.
+Due attività:
+\begin{itemize}
+	\item analisi statica della sintassi, analisi del codice e di verifiche della sintassi. \textbf{Pylint}, usalo!
+	\item \textbf{unit testing}, test dell'unità. Isolare funzionalità il più possibile elementari, e verificare che quel pezzettino faccia la cosa giusta. Piccolo test, verificato in una cosa relativamente piccola ed ho una metrica che lo controlla. L'esempio non è per dire che in ogni caso fa la cosa giusta, ma vanno isolati i casi interessanti. Spezzo il codice in parti elementari. Le funzioni più sono piccole e focalizzate più sono fatte meglio. Va realizzato con una scelta oculata di funzioni e classi.
+\end{itemize}
+
+\textbf{Variabili d'ambiente}: sono la chiave per il funzionamento del sistema operativo. Su internet si trova. Scrivere un backslash in modo che sia un backslash davvero? \mintinline{python}{\\}.
+
+\textbf{Encoding}: modo di codificare i caratteri del sistema. Corrispondenza fra un glifo e un numero binario/esadecimale. Windows in automatico usa Latin1, non UTF-8. Errori di Unicode: codificare un file con un codice diverso da quello con cui è stato scritto.
+
+\mintinline{python}{assert}, è una parola riservata, valuta un espressione, se è vera non fa nulla, se è falsa genera un \texttt{AssertingError}. In generale non va usato mai l'assert, perché in caso di errore non posso modificarlo in corsa. Sensata solo quando si è certi del risultato e usato nel debugging.
+
+Per i test però non ha senso fare tanti piccoli test manuali, voglio trovare un modo generalissimo di farlo. All'aumentare della complessità del programma, capita che fai un cambiamento e questo cambiamento distrugge altre parti che interagiscono con il programma se fatto male.
+Se cresce organicamente con una serie di unit tests, riesce a crescere bene e senza rompersi.
+Una funzione deve incapsulare una funzione semplice e ben definita. Unit testing è assicurarsi che ogni pezzo faccia quello che deve fare.
+Un paradigma particolare è il Test-Driven Development (TDD): prima di scrivere la funzione scrivo il test, poi scrivo il corpo vuoto della funzione, e alla fine implemento la funzione fino a quando il test non passa. Verifica sempre che si può fare prima il test!
+Una cosa da convincere è che il test e la documentazione vanno fatti fin dall'inizio.
+Forzarsi a scrivere la documentazione e il test.
+
+Nell'esempio naïve delle slides, va sistemata la tipizzazione e i controlli su quello che viene passato. Vanno pensati i test per tutti i casi in cui viene usata.
+Io non voglio fare nulla a mano però, completamente inutile. Voglio allora usare qualche framework per gli unittest, in particolare \texttt{unittest}, oppure \texttt{pytest}. Oggi tutti usano la seconda ma non è detto si a più efficace.
+Test sono fatti in modo da poter runnare automaticamente. Nei test deve essere chiaro cosa voglio testare, e deve essere chiaro cosa voglio ottenere:
+\begin{minted}{python}
+import unittest
+
+def square(x):
+	"""Function returning the suare of x.
+	In real life this would be in a differnt module!
+	"""
+	return x**2.
+
+class TestSquare(unittest.TestCase):
+
+	def test(self):
+		"""Dumb unit test---make sure that the square of 2. is 4.
+		"""
+		self.assertAlmostEqual(square(2.), 4.) # usato almost equal per il discorso di float.
+
+if __name__ == '__main__':
+	unittest.main()	
+\end{minted}
+
+Se guardo un repo, ci sono due cartelle, \texttt{test} e \texttt{docs}. Ci sonon un certo numero di test. Il repo di esempio di github è `ixpeobssim` su github da lucabaldini.
+Per fare fare un test, uno dovrebbe scrivere sul terminale \mintinline{python}{python -m unittest programName} e farglielo fare, oppure creare un \texttt{Makefile} piccolino che lo faccia in automatico.
+
+Tipicamente uno di questi test non leggi mai l'output. Ma passa da solo. Non devo essere io che la triggero. A me interessa solo quando fallisce, ed è il concetto di continuous integration, ed è il concetto di \textit{Action} su github.
+
+**TODO**: attaccare il repo ad un CI/CD.
+
+Poi fa pylint.
+
+Static typing/annotations, posso annotare le funzioni in modo che sappia che sono di un certo tipo. Però è per la leggibilità del codice, è solo annotazione.
+\begin{minted}{python}
+def square(x):
+	"""Return the square of a number, but without annotations
+	"""
+	return x**2.
+def annotated_square(x: float) -> float:
+	"""Return the square of a number; this is the structure of an annotation.
+	It just increases legibility.
+	"""
+	return x**2.	
+\end{minted}
+
+\subsubsection{Documenting}
+
+Le pagine di documentazione non sono fatte a mano. Basta vedere il link al codice sorgente della funzione. 
+Va notato che nella documentazione c'è il commento nella docstring.
+Documentazione vive dentro il codice, e il meccanismo di documentazione sono le docstrings, fra apici tripli.
+Non sono un posto dove le cose sono fatte a caso, ma permette a un tool automatico (\textbf{sphynx}) di generare automaticamente la documentazione.
+Quali argomenti prende in ingresso, cosa fa, qualunque cosa in cui dobbiamo stare attenti.
+How to use sphynx, learn it. \texttt{readthedocs} è open source.
+Fare il tag di una nuova versione?
+Automatizzare le cose, o lo sono automatiche o non succedono.
+Per il progetto finale ce lo si aspetta.
+
+\subsection{Numpy and SciPy}
+
+Introdotto il concetto di applicabilità all'array elemento per elemento, e il concetto di broadcasting, cioè fra array di dimensioni opportune posso eseguire operazioni artmetiche.
+\mintinline{python}{np.full((2,4), 3.)} fa una matrice $2\times4$ piena di soli tre.
+In generale le operazioni le fa elemento per elemento, anche il prodotto. Però devono avere la stesssa dimensione.
+Se hanno la stessa lunghezza, è ovvio moltiplicarlo, se con lunghezze diverse non è banale cosa significa.
+Se usi broadcasting e ci si ragiona bene, fattore 100 sulla velocità.
+\mintinline{python}{dir(object)} fornisce tutte le operazioni definite su quell'oggetto.
+
+Quali sono le regole del broadcasting? Sulla documentazione di Scipy. Sono complesse.
+
+\subsubsection{Maschere}
+
+Supponiamo che vogliamo vedere dove convertono i fotoni nel silicio, la lunghezza di assorbimento.
+
+\begin{minted}{python}
+import random
+import time
+import numpy as np
+import matplotlib.pyplot as plt
+
+N = 1000000 # numero di fotoni
+THICKNESS = 0.200 # mm, spessore del materiale del fotorilevatore
+
+lambda_ = 0.100 # mm, e lambda in realtà è riservata e quindi uso l'underscore per poter usare quel nome
+
+num_absorbed = 0.
+abs_z = []
+
+t0 = time.time()
+# abbiamo notato l'errore dalla fisica e notiamo cosa fa expovariate, quindi vuole 1/lambda e non lambda
+for i in range(N):
+	z = random.expovariate(1. / lambda_)
+	if z < THICKNESS:
+		num_assorbed += 1
+		abs_z.append(z)
+elapsed_time = time.time() - t0
+print(f'Running time: {elapsed_time}')
+
+quantum_efficiency = num_absorbed / N
+print(f'Quantum efficiency: {quantum_efficiency}')
+# me la aspetto circa 1-e^-2, quindi circa 90%, non così poca.
+
+plt.hist(abs_z, bins=100)
+plt.yscale('log')
+plt.show()
+\end{minted}
+
+Questo programma lavora linearmente con $N$, quindi non è banale il fatto che voglia risparmiare di tempo... 
+Vettorizzare significa eliminare cicli for e sostituirlo con operazioni fra vettori. Quando possibile, questo fa la differenza come tempistiche.
+
+\begin{minted}{python}
+import random
+import time
+import numpy as np
+import matplotlib.pyplot as plt
+
+N = 1000000 # numero di fotoni
+THICKNESS = 0.200 # mm, spessore del materiale del fotorilevatore
+
+lambda_ = 0.100 # mm, e lambda in realtà è riservata e quindi uso l'underscore per poter usare quel nome
+def eff_simple():
+	abs_z = []
+	t0 = time.time()
+	for i in range(N):
+		z = random.expovariate(1. / lambda_)
+		if z < THICKNESS:
+			num_assorbed += 1
+			abs_z.append(z)
+	elapsed_time = time.time() - t0
+	print(f'Running time: {elapsed_time}')
+	return abs_z
+
+# ora vettorizziamo la funzione. Notiamo che numpy genera random in array, la numpy random.exponential
+def eff_vectorized(num_events):
+	# invece di generare un loop for, le genero tutte assieme, ma avviene in C e non in python che è lento.
+	abs_z = np.random.exponential(lambda_, size=num_events)
+	print(abs_z, len(z)) # questo solo di test per vedere che funziona.
+	# questa si chiama maschera
+	abs_z = abs_z[abs_z <= THICKNESS]
+	elapsed_time = time.time() - t0
+	print(f'Running time: {elapsed_time}')
+	return abs_z
+
+z = eff_simple(N)
+quantum_efficiency = len(z) / N
+print(f'Quantum efficiency: {quantum_efficiency}')
+# me la aspetto circa 1-e^-2, quindi circa 90%, non così poca.
+z = eff_vectorized(N)
+quantum_efficiency = len(z) / N
+print(f'Quantum efficiency: {quantum_efficiency}')
+#
+#plt.hist(abs_z, bins=100)
+#plt.yscale('log')
+#plt.show()
+\end{minted}
+
+Lo slicing invece cos'è? e Indexing, cioè come si fa in Numpy a prendere sottoinsiemi di array. Comunque sulle slides c'è.
+
+Prima di tutto che cos'è una maschera? 
+
+\begin{minted}{python}
+import numpy as np
+
+a = np.random.uniform(size=10)
+mask = a > 0.5
+\end{minted}
+
+In questo esempio, il nuovo array mask creato è un array con soli true e false, un array di booleani dove è scritto in ogni cella se è vera o falsa la condizione scritta.
+ma posso anche fare
+
+\begin{minted}{python}
+a[mask]
+\end{minted}
+
+e questo, passando una maschera con parentesi quadre, restituisce un array in cui gli elementi presenti corrispondono ai true della maschera.
+
+Comunque si vede dal codice che è un risparmio notevole. Nella vita si fa questo, vettorizzo problemi che non si sanno fare altrimenti.
+Per esempio se su un immagine ho cose sensate. In generale siamo abituati ai loop, ma non è efficiente.
+Esempio di qualcosa di difficile da vettorizzare, nel mondo della fisica delle particelle.
+Se faccio assorbire un fotone nel silicio di 5 keV, se 3.6, sono circa 1500 in media di coppie generate. Qual è la varianza su questo? Non è una poissoniana, perché c'è un fenomeno che non conosco. 
+Siccome il numero non è fisso, questa è una cosa difficile da vettorizzare.
+
+Libreria importante è \texttt{pandas}, che può fare comodo.
+In generale leggere e scrivere file excel con python lo si fa con pandas.
+\begin{minted}{python}
+import pandas as pd
+\end{minted}
+
+Ora lavoriamo con l'\texttt{assignment\_basic\_4}
+
+\begin{minted}{python}
+import matplotlib.pyplot as plt
+import numpy as np
+import scipy.interpolate import InterpolatedUnivariateSpline
+
+class ProbabilityDensityFunction(InterpolatedUnivariateSpline):
+	# in teoria potrei anche commentare tutto e fare pass, perché in pratica sto rinominando la funzione con il programma base.
+	def __init__(self, x, y):
+		""" Construct
+		"""
+		super().__init__(x, y)
+
+if __name__ == '__main__':
+	x = np.linspace(0., np.pi, 20)
+	y = np.sin(x)
+	f = ProbabilityDensityFunction(x, y)
+
+	print(f.integral(0., np.pi) # le spline hanno il metodo integral, e così posso normalizzare
+
+	plt.plot(x, y, 'o')
+	_x = np.linspace(0., np.pi, 200)
+	plt.plot(_x, f(_x))
+
+# parte da griglia, e interpola da griglia una funzione.
+\end{minted}
+
+Come si fa a generare un numero random? Primo metodo, hit or miss, e quindi da random uniforme creo coppie di punti e se $y$ è sotto $f(x)$ accetto x o meno.
+
+Altrimenti, uso la funzione cumulativa e la ppf (percent-point function). La cumulativa mappa il punto nel quantile, se ruoto invece di 90 gradi, la nuova funzione mappa il quantile nel suo valore.
+E se si prende un array random fra $0$ e $1$ e gli applico la ppf, avremo un array generato come la funzione di densità di probabilità. Si chiama inverse transform. L'abbiamo fatto a Analisi Statistica dei Dati. Esponenziale è un caso in cui la ppf si può generare analiticamente.
+\textbf{TODO}: capire cos'è una spline. una funzione interpolatrice. Queste funzioni sono facilmente integrabili e derivabili. Facilmente normalizzabili, la cdf è gratis per l'integrale, e allora per generare numeri random vanno generati fra 0 e 1, ci applico la ppf e ho finito.
+
+\texttt{splrand} sembra esserci più o meno un'implementazione davvero funzionante.
+
+Questo è complesso come assegnamento. Prendere come ispirazione.
+
+\section{Lezione 7, giovedì 13 ottobre 2022}
+
+\subsection{Assegnamento 2}
+
+Generare numeri random in due modi diversi, una con le spline functions, una per generare con l'inverso della fourier transform.
+Ora guardo la funzione da \texttt{pdf.py} e voglio vedere come calcolare la cdf. Fa vedere che sto applicando gli argomenti giusti e calcolo correttamente la cdf. 
+Unica cosa, non è detto che la lista che passo sia ordinata, quindi forse andrebbe specificato nella documentazione.
+La cdf non è difficile da calcolare, invertirla è un casino, è il calcolo della ppf.
+Se ho zone in cui prob è zero, allora ho problemi: la cdf sarà costante e allora nella spline gli passo valori tutti uguali, e per la spline è un casino.
+Come filtro un array?
+
+\begin{minted}{python}
+a = np.array([1., 2., 2., 3., 4., 4.])
+np.unique(a)
+# questo ritorna solo i valori unici della y, 
+np.unique(a, return_index = True)
+\end{minted}
+
+Concettualmente, il debugging che faccio a mano sul codice ha senso farlo nell'unittest.
+Linea 69 del test, noti che se plotti con più punti, le discontinuità si fanno vedere! la spline non converge benissimo, perché di ordine 3...
+Se invece di farla di ordine tre la faccio di ordine 1, interpoli, è molto più bello
+In generale le funzioni discontinue vanno trattate in modo diverso... 
+Negli strumenti che costruiscono gli astronomi, hanno i bordi perché sono oltre il $k_{edge}$ degli specchi in astronomia.
+
+La normalizzazione va fatta a mano? cioè va fatta automaticamente.
+fra la def di \texttt{init} e \texttt{super()}. Va rifatto a manina.
+
+\begin{minted}{python}
+norm = InterpolatedUnivariateSpline(x, y, k=k).integral(x[0], x[-1])
+y /= norm
+\end{minted}
+
+```
+
+\textbf{TODO} vedi a casa come si fa a vedere se l'array è ordinato.
+
+\subsection{Errori ed altro}
+
+\texttt{Traceback} e il tipo di errore.
+Qua dice esattamente qual è il problema! Al contrario di git.
+\texttt{lecture\_advanced\_2}
+In \texttt{C} si ritorna codici di errore numerici, 0 tutto ok, numero diverso non ok.
+In Python si usa altro, il meccanismo delle eccezioni (exceptions).
+Nelle slides pagina tre c'è perché ha senso usare eccezioni e non flags.
+
+\begin{minted}{python}
+iterable_array[:5] # è lo slicing dell'array dalla posizione in 5 in poi
+\end{minted}
+
+Se guardo la funzione \mintinline{python}{cut_before} implementata a pagina 4, noto che dà un errore molto chiaro.
+In python la filosofia di base è evitare di inventare. Ha senso. In generale posso inventarmi molte cose, molti modi di maneggiare, però fagli sputare l'errore direi che è la cosa migliore! Se la sottostringa non c'è, io gli ritorno il value error e lo sa che non sta passando.
+Come intercetto però un errore e gli dico che voglio fare qualcosa di specifico?
+Eccezioni.
+Cosa sono? È un oggetto, che eredita da una classe di oggetti.
+È \texttt{raised} quando lo segnalo che è andato male.
+Posso intercettare (\texttt{caught}) l'eccezione, e posso dire che con il meccanismo di \texttt{TryExcept}:
+
+\begin{minted}{python}
+def cut_before(input_string, substring):
+	try:
+		result = input_string[:(input_string.index(substring))]
+		print('This line is not executed if an exception is raised in the try block')
+		return result
+	# Catch the correct exception type with 'except'
+	except ValueError:
+		print('This line is executed only if a ValueError is raised in the try block')
+\end{minted}
+
+Se non si sollevano eccezioni, siamo nel primo branch, se invece incontro un eccezione, andiamo nel branch except corrispondente. 
+Nota che l'except può essere eseguito in base al tipo di errore!
+Qual è la logica? Non crasha!! E continuo a fare cose se so che tipo di errore esce sempre.
+Si possono intercettare, e posso
+Ok, \texttt{except:} si può fare ma preferirei non farlo e specifico il tipo di errore.
+Tipico errore, try except \texttt{KeyError}, in generale dobbiamo intercettare l'errore nel modo più specifico possibile.
+Cioè, un conto è se manca la chiave, un conto è se manca tutto il dizionario!
+\texttt{else} e \texttt{finally} sono altri statement da usare.
+Se le cose fossero solo così, non sono molto meglio. Però in generale il trick è che l'errore manda indietro tutto l'oggetto, l'\textit{eccezione}, e quindi passo tutte le informazioni che servono a ricostruire l'errore del file.
+Molto generale, in cui ci sono gerarchie di eccezioni molto ricche che consentono di fare la gestione degli errori.
+Pagina 10 c'è la gestione degli errori.
+\texttt{with}. Se lo facciamo in modo brutale, solo con open, lascia le cose incasinate, ma posso usare with che è più sicuro.
+
+\begin{minted}{python}
+try:
+	with open ('i_do_not_exist.txt') as lab_data_file:
+	""" Do some process here...
+	"""
+	pass
+
+except FileNotFoundError as e: 
+	# we assign a name to the the exception, 
+	# e la passiamo e maneggiamo come un oggetto!!
+	print(e)
+
+# We can be less specific by catching a parent exception
+except OSError as e:
+	# OSError is a parent class of FileNotFoundError
+	print(e)
+
+# catching Exception will catch almost everything!
+except Exception as e:
+	print(e)
+\end{minted}
+
+Generalmente, non dovremmo mai chiamare \texttt{Exception} perché è troppo generale.
+Even worse, you should never catch for \texttt{BaseException} 
+as that would even prevent the user from aborting the execution with a \texttt{KeyboardInterrupt}, ad esempio usando \texttt{Ctrl-C}.
+
+Asking permission: prima guardo se c'è il file e poi lo apro. In Python come costo computazionale è il contrario, è più facile provare e otterere l'errore che il contrario! Differenza filosofica grande. In C è il contrario.
+
+fare \texttt{if: else:} non conviene!
+
+Esiste il \texttt{logging}, non lo ha guardato.
+
+Possiamo sollevare eccezioni da noi!
+
+Ad esempio pagina 20 delle slides, \texttt{raise RuntimeError}
+Ricorda, in Python si può fare cose violente, tipo \texttt{sys.exit()}. Questa è un opzione, ma va valutata! Se metto l'uscita, non posso intervenire! Se invece uso l'errore, chi usa il codice e lo estende, ha l'opzione di estendere il codice e può intercettare e gestire l'eccezione. Sollevare l'opzione, lascia la scelta all'utente.
+
+Possiamo creare un eccezione in maniera granulare addirittura, con una classe appostita che eredita da \texttt{(Exception)}.
+
+Ad esempio, pagina 23 fa la value too large exception.
+Dove vanno intercettate le eccezioni il prima possibile!
+In generale le eccezioni vanno fatte subito, non mettendo un blocco grossissimo di funzione all'interno di un blocco tryexcept. I blocchi devono essere il più piccoli e specifici possibili.
+
+\texttt{split()} per stringa usata per separare cose.
+
+Ha fatto l'esempio di vario codice, e non torna! Bisogna imparare a capire dove cercare gli errori.
+
+Funzione che fa parsing di una singola linea. ! \textbf{si può iterare sui file}!
+
+Qua non ho nemmeno gestito l'errore, e vorrei invece sapere nel file quale linea è problematica.
+
+\begin{minted}{python}
+def parse_line(line):
+	""" Parse a line of the file and return the values as float"""
+	values = line.strip('\n').split(' ')
+	# the following two lines may generate exceptions if they fail!
+	time = float(values[0])
+	tension = float(values[1])
+	return time, tension
+
+with open('snippets/data/fake_measurements.txt') as lab_data_file:
+	for line in lab_data_file:
+		if not line.startswith('#'): # skip comments
+			time, tension = parse_line(line)
+			print(time, tension)
+\end{minted}
+
+Qua invece sto prendendo l'errore troppo presto, non passo info interessanti.
+
+\begin{minted}{python}
+def parse_line(line):
+	""" Parse a line of the file and return the values as float"""
+	values = line.strip('\n').split(' ')
+	try:
+		time = float(values[0])
+		tension = float(values[1])
+	except ValueError as e:
+		print(e) # This is not useful - which line of the file has the error?
+		return None # We can't really return something meaningful
+	return time, tension
+
+with open('snippets/data/fake_measurements.txt') as lab_data_file:
+	for line in lab_data_file:
+		if not line.startswith('#'): # skip comments
+			time, tension = parse_line(line)
+			print(time, tension) # This line still crash badly!
+\end{minted}
+
+In questo caso è quello giusto da fare, così capisco anche la linea.
+
+\begin{minted}{python}
+def parse_line(line):
+	""" Parse a line of the file and return the values as float"""
+	values = line.strip('\n').split(' ')
+	time = float(values[0])
+	tension = float(values[1])
+	return time, tension
+
+with open('snippets/data/fake_measurements.txt') as lab_data_file:
+	for line_number, line in enumerate(lab_data_file): # get the line number
+	if not line.startswith('#'): # skip comments
+		try:
+			time, tension = parse_line(line)
+			print(time, tension)
+		except ValueError as e:
+			print('Line {} error: {}'.format(line_number, e))
+\end{minted}
+
+Consiglio su cosa va usato. Quantità di codice scritto in Fortran e C è enorme e usati ovunque, quindi c'è valore nel saper programmare in queste cose. Se cominci ora da zero a scrivere qualcosa, scrivilo in C++ o Python, ma saper programmare in Fortran ha un valore solo per il materiale che c'è in giro.
+Python puro è lento, ma ci sono molte librerie scritte in linguaggi compilati che consentono di fare cose velocemente. Ci sono cose che come tempo contano 0 e però ha tempo di sviluppo di molto.
+
+\begin{minted}{python}
+from splrand.pdf import ProbabilityDensityFuncion
+import numpy as np
+
+x = np.linspace(0., 1., 100)
+y = 2. * x
+pdf = ProbabilityDensityFunction(x, y)
+
+# ora non chiamo il costruttore, ma un oggetto creato, e che ha un metodo chiamato call
+pdf(0.5)
+> [Output]: array(1.)
+\end{minted}
+
+Ad esempio, supponiamo di fare una classe, 
+
+\begin{minted}{python}
+class Dummy:
+
+	def __init__(self, name):
+		self.name = name
+
+if __name__ == '__main__':
+	d = Dummy('ciao')
+	print(d.name)
+	print(d(3))
+	# che succede? type error, perché non è chiamabile!
+\end{minted}
+
+Questo metodo magico chiamato \mintinline{python}{__call__} è l'unico che consente di chiamare le cose, se lo aggiungo come 
+
+\begin{minted}{python}
+def __call__(self, value):
+	return value * 3.
+\end{minted}
+
+Pagina sul data model di python, fra le varie cose abbiamo le basic customization, metodi magici che mimicano un certo numero di comportamenti dei tipi standard di python.
+Chiamare il costruttore della classe è una cosa, che restituisce l'istanza di una classe; a quel punto dipende se l'oggetto ha un metodo per essere chiamato.
+Sulla documentazione dice cosa succede per ogni metodo. Se non fai overload, il metodo della classe genitore viene utilizzato.
+Quando invece di fare i loop sulle funzioni, tutte fatte nella funzione max di python, basta dire come due oggetti si confrontano, molto più facile da leggere e meno difficile da sbagliare.
+Anche il \href{https://docs.python.org/3/reference/datamodel.html}{datamodel} da avere come la Bibbia.
+
+\section{Lezione 8, lunedì 17 ottobre 2022}
+
+\subsection{Iteratori}
+
+Parlato di come si fa a rendere un oggetto iterabile alla python, che fa fare il ciclo for. Come si fa? si usa il metodo magico \mintinline{python}{__iter__}. Noi l'avevamo fatto riciclando il metodo \texttt{iter} della libreria \texttt{array}.
+Un iteratore ha implementato il metodo \mintinline{python}{__next__}. In pratica si sa qual'è il prossimo elemento da restituire. Chiamando l'oggetto, vi restituisce quello successivo. Quando è finita l'iterazione, deve sollevare un'eccezione chiamata \texttt{StopIteration()}.
+Perché devo implementare \texttt{iter} che usa \texttt{next} e devo implementare \texttt{next}? Perché così posso avere più iteratori attivi sullo stesso tipo di oggetto iterabile.
+Motivo per cui un iteratore è tecnicamente un iterabile, ma non il viceversa è sempre vero!
+Ora fa un esempio per capire che il ciclo for è equivalente a un ciclo infinito di chiamate fino a quando non esce l'eccezione:
+
+\begin{minted}{python}
+my_list = [1., 2., 3.]
+
+# For-loop syntax
+for element in my_list:
+	print(element)
+
+# This is equivalent (but much less readible and compact)
+list_iterator = iter(my_list)
+while True:
+	try:
+		print(next(list_iterator))
+	except StopIteration:
+		break
+\end{minted}
+
+Notiamo che se implementiamo \texttt{getitem} e \texttt{len} l'interprete si fa da sé l'iteratore.
+
+Il seguente metodo funziona per le liste e non per i dizionari perché non solleva il \texttt{KeyError}.
+
+\begin{minted}{python}
+class SimpleIterator:
+	""" Class implementing a super naive iterator"""
+	def __init__(self, container):
+		self._container = container
+		self.index = 0
+
+	def __next__(self):
+		try:
+			# Note: here we are calling the __getitem__ method of self._container
+			item = self._container[self.index]
+		except IndexError:
+			raise StopIteration
+		self.index += 1
+		return item
+	
+	def __iter__(self):
+		return self
+
+class SimpleIterable:
+	""" A very basic iterable """
+	def __init__(self, *elements):
+		# We use a list to store elements internally.
+		# This provide us with the __getitem__ function
+		self._elements = list(elements)
+
+	def __iter__(self):
+	return SimpleIterator(self._elements)
+\end{minted}
+
+Questo è un generatore basico. In generale posso fare iteratori a caso, tipo in \mintinline{python}{crazy_iterator} lo fa diverso e strano.
+
+Esistono metodi che dato un iterabile ritornano un singolo valore.
+
+Iteratori, sono utili da usare wrappando i container.
+Infine, gli iteratori operano su dati esistenti!
+
+\subsection{Generators}
+
+Qualcosa che ad ogni interazione calcola il prossimo, per risparmiare memoria. Per calcolare qualcosa un attimo prima di usarla e non prima. 
+Un minimo di procrastinazione.
+Possiamo iterare su elementi che non esistono prima ma vengono calcolati mano mano. 
+Ci sono due modi, o con le \textit{generator expressions}, o con le \textit{generator functions}. In realtà nella vita vera le generatrici li dà python, ad esempio \texttt{range()} in \texttt{python3}.
+Una volta che abbiamo il generatore, possiamo usarlo per il for loop.
+
+\begin{minted}{python}
+for i in range(4): # generators act like iterators in for loop
+	print(i)
+
+data = [12, -1, 5]
+square_data_generator = (x**2 for x in data) # generator expression!
+# qua la differenza rispetto alle [] è che non viene calcolata o creata la lista, ma calcolato tutto solo dentro un loop.
+for square_datum in square_data_generator: # again, works like an iterator
+	print(square_datum)
+\end{minted}
+
+Siccome la lista nell'esempio di sopra non è calcolata per intero prima, se modifico `data` in corso di loop, anche la generazione segue le modifiche della lista, dato che non è calcolata prima.
+
+la \textbf{funzione generatrice} è una funzione che si crea e dopo un po' c'è uno \texttt{yield}. Il risultato di quando lo creo è che viene restituito un generatore. 
+Il generatore è un oggetto che ha il metodo \texttt{next}. Che fa? esegue tutto il codice fino a \texttt{yield}, dove ritorna il valore che segue \texttt{yield}. Quando finisce solleva \texttt{StopIteration}.
+Di solito i generatori sono scritti con un loop all'interno.
+
+\begin{minted}{python}
+# Generator function that provides infinte fibonacci numbers
+def fibonacci():
+	a, b = 0, 1
+	while True:
+		yield a
+		a, b = b, a + b
+
+# We need to impose a stop condition externally to use it
+max_n = 7
+fib_numbers = []
+for i, fib in enumerate(fibonacci()):
+	if i >= max_n:
+		break
+	else:
+		fib_numbers.append(fib)
+print(fib_numbers)
+
+# Another way of doing that is using 'islice' from itertools
+import itertools
+# Generator expression
+fib_gen = (fib for fib in itertools.islice(fibonacci(), max_n))
+print(list(fib_gen))
+\end{minted}
+
+Qua la funzione \texttt{fibonacci()} non restituisce nulla, ma viene creato un oggetto tipo generatore e restituito. Quando poi lo uso, metto una condizione di stop esterna.
+Modo elegante è \texttt{.islice()} dalla libreria \texttt{itertools}. In pratica, crea con un generatore e un massimo, restituisce un iterabile. In generale, comunque, va notato come \mintinline{python}{fib_gen} non ho calcolato nulla, perché ho le parentesi tonde e non quadre.
+
+Il generatore serve quando voglio generare elementi in maniera lazy.
+Le funzioni generatrici di python sono davvero tantissime, la pagina 43 delle slides \texttt{lecture\_advanced\_2} ne elenca alcune e poi fa qualche esempio.
+
+Un metodo carino è il \texttt{groupby}, in generale si usa e c'è anche in \texttt{pandas}.
+
+\subsection{Lambda functions}
+
+\textbf{Anonimous Functions} are a construct typical of functional programming, tipo \textit{Lambda calculus}.
+In Python, crea una funzione in corsa senza dargli un nome. Sono limitate a espressioni singole, ritornate all'utente. Molti degli usi tipici della lambda function sono fatte dalle espressioni generatrici e \textit{list comprehension}.
+
+la sintassi è 
+\begin{minted}{python}
+multiply = lambda x, y: x * y
+\end{minted}
+
+Questa è una funzione a una riga, e quindi mi serve una funzione al volo e non la devo definire prima.
+
+\texttt{map} applica una funzione ad un iterabile.
+In generale il loro use case è coperto dal linguaggio normale.
+L'uso delle \texttt{lambda} è solo quando la funzione dopo è molto breve.
+
+L'esercizio di ricapitolazione finale aveva senso ma non è molto illuminante, dice che preferisce esercitazione, lui che scrive codice.
+
+Ora facciamo assignment advanced 2.
+
+\subsection{Assignment Advanced 2}
+
+Questo è stato buona parte trattato nel file dell'assegnamento, con qualche aggiunta sul file in Markdown.
+
+\section{Advanced Python Features, the end}
+
+\subsection{Funzioni}
+
+Le funzioni sono oggetti di prima classe, significa che possono essere passati come argomenti ad altre funzioni e tornate come risultati da altre funzioni.
+Del resto le funzioni sono oggetti di una classe. E si può definire un'altra funzione dentro una funzione.
+
+Perché definire una funzione dentro una funzione? Ha senso, per esempio se devo tornarla come risultato della funzione.
+
+Quando una funzione è creata all'interno di un'altra funzione ha accesso alle variabili locali della funzione esterna, anche se il suo scopo è esaurito. Questo è possibile perché le variabili sono tenute in uno speciale spazio di memoria, la \textbf{chiusura} della funzione interna.
+Queste variabili sono chiamate variabili libere: in questo modo, una funzione può mantenere uno stato dentro la sua chiusura. Questo consente di usare le funzioni per compiti che in altri linguaggi sono riservati alle classi.
+
+Ad esempio: 
+
+\begin{minted}{python}
+import numpy
+
+def rotate(x, y, theta):
+	""" Naive implementation. This works, but is inefficient - we have to
+	calculate cos(theta) and sin(theta) for each pair (x,y)! """
+	c = numpy.cos(theta)
+	s = numpy.sin(theta)
+	x_rot = c * x - s * y
+	y_rot = s * x + c * y
+	return x_rot, y_rot
+
+x, y = 1., 0.
+theta = numpy.pi/4
+print(rotate(x, y, theta)) # Rotation of pi/2
+
+def efficient_rotate(x, y, c_theta, s_theta):
+	""" Efficient rotation. The user gives cos and sin, so they are not
+	calculated for each pixel """
+	x_rot = c * x - s * y
+	y_rot = s * x + c * y
+	return x_rot, y_rot
+
+c = numpy.cos(theta)
+s = numpy.sin(theta)
+print(efficient_rotate(x, y, c, s)) # The syntax is very ugly!
+
+def create_rotator(theta):
+	""" Efficient rotation. Cosinus and sinus values are saved in the closure,
+	so that they are computed exactly once."""
+	c = numpy.cos(theta)
+	s = numpy.sin(theta)
+	def rotate(x, y):
+		x_rot = c * x - s * y
+		y_rot = s * x + c * y
+		return x_rot, y_rot
+	return rotate
+
+x, y = 1., 0.
+theta = numpy.pi/4
+rotate_by_theta = create_rotator(theta)
+print(rotate_by_theta(x, y))
+\end{minted}
+
+Si noti come la cosa più sensata è l'ultima ed è anche la più efficiente dal punto di vista del tempo computazionale.
+
+Una cosa a cui fare attenzione è che definendo una variabile libera dentro una funzione interna, in automatico viene creata una variabile locale; se voglio invece usarne una non locale, devo usare l'indicatore \texttt{nonlocal}. \textit{Explicit is better than implicit}.
+
+Invece di 
+\begin{minted}{python}
+def running_average():
+	total_count = 0
+	num_elements = 0
+	def accumulator(value):
+		total_count += value # Doesn’t work! total_count is reassigned!
+		num_elements += 1 # Doesn’t work! total_count is reassigned!
+		return total_count/num_elements
+	return accumulator
+\end{minted}
+
+uno dovrebbe dichiararli non locali:
+
+\begin{minted}{python}
+def running_average():
+	total_count = 0
+	num_elements = 0
+	def accumulator(value):
+		# We declare the relevant variables as nonlocal
+		nonlocal total_count, num_elements
+		# Now we can assign to them - the variables in the closure will be
+		# modified, as we want!
+		total_count += value
+		num_elements += 1
+		return total_count/num_elements
+	return accumulator
+\end{minted}
+
+In genere, si usano funzioni dentro funzioni solo quando si vuole fare un \textit{wrapper}.
+
+\paragraph{Wrapper.} Un \textit{wrapper} è una funzione che chiama un'altra funzione aggiungendo un layer di funzionalità in mezzo, per esempio processare l'input o cambiare l'output in qualche modo formattato bene tipo. La tecnica per costruirlo è:
+\begin{itemize}
+	\item passare la funzione da wrappare come argomento della funzione esterna;
+	\item dentro la funzione esterna definiamo una funzone interna, che è il wrapper;
+	\item il wrapper chiama la funzione passata e aggiunge le funzioni;
+	\item ritorniamo la funzione esterna.
+\end{itemize}
+
+Per fare un esempio sensato:
+\begin{minted}{python}
+def some_function(a, b):
+	print(’Executing {} x {}’.format(a, b))
+	return a * b
+
+def add_n_wrapper(func, n): # We take the wrapped function as argument
+	""" This wrapper adds n to the result of the wrapped function"""
+	def wrapper(*args, **kwargs):
+		"""We passs the arguments as *arg, **kwargs, 
+		because this is the most general form in Python:
+		we can collect any combination of arguments like that.
+		Note that we have access to both ’func’ and ’n’,
+		as they are stored in the closure of ’wrapper’"""
+		result = func(*args, **kwargs) # Pass the arguments to the wrapped fucntion
+		print(’Adding {}’.format(n))
+		return result + n # Return a modified result in this case
+	return wrapper # From add_n_wrapper we return the wrapper
+\end{minted}
+
+\subsection{Decoratori}
+
+Per riassegnare la funzione wrappata al suo vecchio nome mantenendo le proprietà nuove, si usa una sintassi chiamata decoratori.
+Un \textbf{decoratore} ha semplicemente il nome del \textit{wrapper} con un \textbf{\@} in cima alla sua dichiarazione.
+
+% todo aggiungi il codice per capire che sta a succedere
+
+\paragraph{Metodi della classe.} Un decoratore particolare è il \mintinline{python}{@classmethod}. È tipo un attributo, non ti serve un'istanza per usarlo: un \textit{classmethod} può accedere agli attributi della classe ma non agli attributi dell'istanza. Serve per creare un costruttore alternativo.
+
+\paragraph{Metodo Statico.} Lo \mintinline{python}{staticmethod} è un metodo che non riceve la classe o l'istanza come primo argomento; per questo motivo non altera lo stato della classe. In qualche senso un metodo statico è accoppiato alla classe in maniera vaga, è definito nella classe per convenienza ma potrebbe essere definito anche altrove.
+
+\paragraph{Passare argomenti ad un decoratore.} Per creare un decoratore che accetti argomenti, bisogna aggiungere un altro livello: la funzione \textit{decorator factory}. In pratica si hanno tre livelli:
+\begin{itemize}
+	\item la \textit{decorator factory} che prende i parametri per il decoratore e produce una funzione;
+	\item il decoratore che prende come input una funzione e ritorna il \textit{wrapper};
+	\item il \textit{wrapper} che implementa le funzionalità aggiuntive; di solito prende come input gli stessi parametri del decoratore e del \textit{wrapper}, e ritorna il suo risultato.
+\end{itemize}
+
+% todo finisci qua le cose di codice, mentre la parte di ottimizzazione mi sembra banale
+
+\subsection{Ottimizzazione}
+
+Per ottimizzazione si intende rendere il codice performante, mentre per \textit{profiling} si intende lo studio dei costi di risorse del tuo codice come funzione del tempo, dell'input e dello stato di esecuzione.
+Il messaggio da portare a casa è che \textbf{l'ottimizzazione prematura è la radice di ogni male}.
+Il corretto modo di fare codice:
+\begin{itemize}
+	\item scrivere codice corretto, leggibile, debuggato, testato e documentato;
+	\item ignorare le performance
+	\item se le performance sono buone, amen; altrimenti profila il codice per trovare dove performa peggio, e a quel punto inizia ad ottimizzare dal problema;
+	\item fai test fino a che non hai una nuova versione.
+\end{itemize}
+
+Per capire cosa dovere ottimizzare, devi sapere più o meno come è fatto un computer. 
+I dati sono processati dalla CPU o dalla GPU. La CPU ha alcune memorie cache, chiamate L1, L2 etc da pochi kB. 
+L1 è sul singolo processore, le altre sono condivise fra vari processori. 
+La connessione fra la cache e la CPU si chiama \textit{bus backside} ed è molto veloce. 
+I dati poi vanno trasferiti dalla RAM alla cache, che avviene grazie al \textit{frontside bus} che è molto più lento del \textit{backend bus}.
+Non solo, è anche più lento se devi recuperare i dati dalla memoria solida.
+
+Ovviamente, per ottimizzare la cosa principale sarebbe fare meno operazioni possibili e quindi usare l'algoritmo ottimale per fare il lavoro.
+Vanno ridotte al massimo le operazioni sulla memoria solida e sulla rete; assicurati che i dati richiesti dalla CPU siano già in cache e non devono essere recuperati dalla RAM.
+Usare la vettorizzazione è sempre meglio, perché fa fare alla CPU molte più operazioni in contemporanea.
+Se il sistema ha più di un processore, prova a mettere il lavoro in parallelo in più possibile.
+
+Cosa va evitato? La CPU usa algoritmi di \textit{branch prediction} e \textit{pipelining} per caricare le istruzioni successive e i dati mentre vengono eseguiti quelli correnti.
+Se questo processo fallisce, si ottengono errori di \textit{branch/cache misses} e un numero di \textit{stalled cycles} nel trasporto dati.
+Inoltre, si dovrebbe cercare di tenere i dati in memoria contigui, così da velocizzare i trasferimenti: questo è perché una lista è peggio di un array. 
+Infine, le allocazioni di memoria sono costose come risorse: il programma si ferma e aspetta che il sistema operativo trovi una locazione di memoria.
+Sulle \textit{context switches} e \textit{cpu migrations} non si può fare molto, sono gestite dal sistema operativo.
+
+Gli strumenti utilizzati in generale per fare ottimizzazione sarebbe:
+{\itshape
+\begin{itemize}
+	\item time profiling:
+	\begin{itemize}
+		\item simple \texttt{print} statements;
+		\item a time measuring decorator;
+		\item the \texttt{timeit} Python module;
+		\item the Unix \texttt{time} utility;
+		\item \texttt{cProfile};
+		\item \texttt{line\_profiler};
+	\end{itemize}
+	\item Bytecode study: \texttt{dis};
+	\item CPU efficiency: \texttt{perf};
+	\item Memory profiling: \texttt{heapy}.
+\end{itemize}
+}
+
+\textbf{ATTENZIONE!} Qua fa un esercizio con il \emph{Julia set}, tratto dal libro \textit{High Performance Python}, pubblicato per O'Reilly.
+

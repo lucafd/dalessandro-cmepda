@@ -1,0 +1,21 @@
+\subsection{Lezione 9, giovedì 20 ottobre 2022}
+
+\paragraph{Abstract.} Architettura di Von Neumann. Instruction Level Parallelism: processori superscalari, vettorializzazione e pipelining. Leggi di scaling di Dennard e Moore. Parallelismo a livello di task. Tassonomia di Flynn. Esecuzione concorrenziale. Differenza tra programmazione concurrent e parallelismo. Definizione di Speedup. Legge di Amdhal e legge di Gustafson.
+
+
+
+\subsection{Lezione 10, lunedì 24 ottobre 2022}
+
+\paragraph{Abstract.} Multithreading e Multiprocessing in Python. Vari esempi sull'uso del modulo di multiprocessing: lancio, pool, queue, comunicazione tra processi, sincronizzazione tra processi. Modulo Threading. Confronto tra processi e threads su 2,4,8 processori e confronto con implementazione seriale per un problema di fattorizzazione.
+
+
+
+\subsection{Lezione 11, givedì 27 ottobre 2022}
+
+\paragraph{Abstract.} Introduzione sulle GPU. Definizione della metrica sulla potenza di calcolo. Confronto CPU vs GPU: ambiti di applicazioni e differenze architetturali. Calcolo eterogeneo. Introduzione al modello di programmazione basato su CUDA (nvidia). Cenno sull'utilizzo delle librerie e delle direttive al preprocessore. Esempi sulla struttura di un programma host-device in cuda. Esempi pratici di scrittura di kernel GPU. Somma di vettori come esempio per la gestione delle risorse di parallelizzazione. Discussione della molitplicazioni dei matrici su GPU. Problemi limitati dalla banda e limitati dal calcolo. Uso della shared memory. Brevissimo cenno su alcuni algoritmi classici da poter affrontare con il calcolo parallelo su GPU: Istogrammi e introduzione alle funzioni atomiche; Parallel reduction utilizzando la shared memory e la sincronizzazione; Stencil (convolution) e concetto del filtro con maschera di convoluzione (lasciati sulle slides come esempi da approfondire). 
+
+
+
+\subsection{Lezione 12, lunedì 31 ottobre 2022}
+
+\paragraph{Abstract.} Cenno all'uso colescente della memoria nelle GPU. Introduzione all'uso del modulo pyCUDA. Esercitazione Hands-on: Utilizzo del notebook Jupyter per implementare alcuni esempi sull'uso di GPU in python (attraverso colaboratory). Metodi per l'import di kernel C-CUDA in programmi python. Impiego di Numba per compilare funzioni universali su GPU. Esempi pratici sui decoratori vectorize e guvectorize.
