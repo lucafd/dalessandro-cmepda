@@ -1520,45 +1520,46 @@ Queste variabili sono chiamate variabili libere: in questo modo, una funzione pu
 Ad esempio: 
 
 \begin{minted}{python}
-import numpy
-def rotate(x, y, theta):
-	""" Naive implementation. This works, but is inefficient - we have to
-	calculate cos(theta) and sin(theta) for each pair (x,y)! """
-	c = numpy.cos(theta)
-	s = numpy.sin(theta)
-	x_rot = c * x - s * y
-	y_rot = s * x + c * y
-	return x_rot, y_rot
+import numpy
 
-x, y = 1., 0.
-theta = numpy.pi/4
-print(rotate(x, y, theta)) # Rotation of pi/2
+def rotate(x, y, theta):
+	""" Naive implementation. This works, but is inefficient - we have to
+	calculate cos(theta) and sin(theta) for each pair (x,y)! """
+	c = numpy.cos(theta)
+	s = numpy.sin(theta)
+	x_rot = c * x - s * y
+	y_rot = s * x + c * y
+	return x_rot, y_rot
 
-def efficient_rotate(x, y, c_theta, s_theta):
-	""" Efficient rotation. The user gives cos and sin, so they are not
-	calculated for each pixel """
-	x_rot = c * x - s * y
-	y_rot = s * x + c * y
-	return x_rot, y_rot
+x, y = 1., 0.
+theta = numpy.pi/4
+print(rotate(x, y, theta)) # Rotation of pi/2
 
-c = numpy.cos(theta)
-s = numpy.sin(theta)
+def efficient_rotate(x, y, c_theta, s_theta):
+	""" Efficient rotation. The user gives cos and sin, so they are not
+	calculated for each pixel """
+	x_rot = c * x - s * y
+	y_rot = s * x + c * y
+	return x_rot, y_rot
+
+c = numpy.cos(theta)
+s = numpy.sin(theta)
 print(efficient_rotate(x, y, c, s)) # The syntax is very ugly!
 
-def create_rotator(theta):
-	""" Efficient rotation. Cosinus and sinus values are saved in the closure,
-	so that they are computed exactly once."""
-	c = numpy.cos(theta)
-	s = numpy.sin(theta)
-	def rotate(x, y):
-		x_rot = c * x - s * y
-		y_rot = s * x + c * y
-		return x_rot, y_rot
-	return rotate
+def create_rotator(theta):
+	""" Efficient rotation. Cosinus and sinus values are saved in the closure,
+	so that they are computed exactly once."""
+	c = numpy.cos(theta)
+	s = numpy.sin(theta)
+	def rotate(x, y):
+		x_rot = c * x - s * y
+		y_rot = s * x + c * y
+		return x_rot, y_rot
+	return rotate
 
-x, y = 1., 0.
-theta = numpy.pi/4
-rotate_by_theta = create_rotator(theta)
+x, y = 1., 0.
+theta = numpy.pi/4
+rotate_by_theta = create_rotator(theta)
 print(rotate_by_theta(x, y))
 \end{minted}
 
@@ -1566,7 +1567,68 @@ Si noti come la cosa più sensata è l'ultima ed è anche la più efficiente dal
 
 Una cosa a cui fare attenzione è che definendo una variabile libera dentro una funzione interna, in automatico viene creata una variabile locale; se voglio invece usarne una non locale, devo usare l'indicatore \texttt{nonlocal}. \textit{Explicit is better than implicit}.
 
-% TODO pagina 8/22 del file lecture advanced 3
+Invece di 
+\begin{minted}{python}
+def running_average():
+	total_count = 0
+	num_elements = 0
+	def accumulator(value):
+		total_count += value # Doesn’t work! total_count is reassigned!
+		num_elements += 1 # Doesn’t work! total_count is reassigned!
+		return total_count/num_elements
+	return accumulator
+\end{minted}
+
+uno dovrebbe dichiararli non locali:
+
+\begin{minted}{python}
+def running_average():
+	total_count = 0
+	num_elements = 0
+	def accumulator(value):
+		# We declare the relevant variables as nonlocal
+		nonlocal total_count, num_elements
+		# Now we can assign to them - the variables in the closure will be
+		# modified, as we want!
+		total_count += value
+		num_elements += 1
+		return total_count/num_elements
+	return accumulator
+\end{minted}
+
+In genere, si usano funzioni dentro funzioni solo quando si vuole fare un \textit{wrapper}.
+
+\paragraph{Wrapper.} Un \textit{wrapper} è una funzione che chiama un'altra funzione aggiungendo un layer di funzionalità in mezzo, per esempio processare l'input o cambiare l'output in qualche modo formattato bene tipo. La tecnica per costruirlo è:
+\begin{itemize}
+	\item passare la funzione da wrappare come argomento della funzione esterna;
+	\item dentro la funzione esterna definiamo una funzone interna, che è il wrapper;
+	\item il wrapper chiama la funzione passata e aggiunge le funzioni;
+	\item ritorniamo la funzione esterna.
+\end{itemize}
+
+Per fare un esempio sensato:
+\begin{minted}{python}
+def some_function(a, b):
+	print(’Executing {} x {}’.format(a, b))
+	return a * b
+
+def add_n_wrapper(func, n): # We take the wrapped function as argument
+	""" This wrapper adds n to the result of the wrapped function"""
+	def wrapper(*args, **kwargs):
+		"""We passs the arguments as *arg, **kwargs, 
+		because this is the most general form in Python:
+		we can collect any combination of arguments likethat.
+		Note that we have access to both ’func’ and ’n’,
+		as they are storedin the closure of ’wrapper’"""
+		result = func(*args, **kwargs) # Pass the arguments to the wrapped fucntion
+		print(’Adding {}’.format(n))
+		return result + n # Return a modified result in this case
+	return wrapper # From add_n_wrapper we return the wrapper
+\end{minted}
+
+\subsection{Decoratori}
+
+% todo 12/22 adv3
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Parallel Programming}
