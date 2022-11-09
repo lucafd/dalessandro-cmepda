@@ -1,4 +1,3 @@
-
 \section{Lezione 6, lunedì 10 ottobre 2022}
 
 \subsection{Testing and Documenting}
@@ -759,11 +758,101 @@ def add_n_wrapper(func, n): # We take the wrapped function as argument
 Per riassegnare la funzione wrappata al suo vecchio nome mantenendo le proprietà nuove, si usa una sintassi chiamata decoratori.
 Un \textbf{decoratore} ha semplicemente il nome del \textit{wrapper} con un \textbf{\@} in cima alla sua dichiarazione.
 
-% todo aggiungi il codice per capire che sta a succedere
+\begin{minted}{python}
+def print_function_info(func):
+	def wrapper(*args, **kwargs):
+		print('Calling function \'{}\''.format(func.__name__))
+		print('Positional arguments = {}'.format(args))
+		print('Keyword arguments = {}'.format(kwargs))
+		return func(*args, **kwargs)
+	return wrapper
+
+@print_function_info
+def some_function(a, b, c=0):
+	return a * b + c
+
+# This is equivalent to: some_function = print_function_info(some_function)
+
+print(some_function(1, 2, c=7))
+# Inspecting the function reveals that we are calling the wrapper
+print('The name of the function is \'{}\''.format(some_function.__name__))
+\end{minted}
+
+Se ad esempio vogliamo fare un decoratore per il tempo,
+
+\begin{minted}{python}
+import time
+from functools import wraps
+
+def clocked(func):
+	""" We use functools.wraps to keep the original function name and docstring"""
+	@wraps(func)
+	def wrapper(*args, **kwargs):
+		tstart = time.clock()
+		result = func(*args, **kwargs)
+		exec_time = time.clock() - tstart
+		print(’Function {} executed in {} s’.format(func.__name__, exec_time))
+		return result
+	return wrapper
+
+@clocked
+def square_list(input_list):
+	""" Return the square of a list"""
+	return [item**2 for item in input_list]
+
+# Make sure the function name and docstring look the same
+print(’\’{}\’: {}’.format(square_list.__name__, square_list.__doc__))
+square_list(range(2000000))
+\end{minted}
+
 
 \paragraph{Metodi della classe.} Un decoratore particolare è il \mintinline{python}{@classmethod}. È tipo un attributo, non ti serve un'istanza per usarlo: un \textit{classmethod} può accedere agli attributi della classe ma non agli attributi dell'istanza. Serve per creare un costruttore alternativo.
+Ad esempio:
+
+\begin{minted}{python}
+import numpy
+
+class LabData:
+
+	def __init__(self, times, values):
+	""" Our usual constructor"""
+		self.times = numpy.array(times, dtype=numpy.float64)
+		self.values = numpy.array(values, dtype=numpy.float64)
+	
+	@classmethod # The classmethod decorator
+	def from_file(cls, file_path): # We get the class as first argument, not self
+		""" Constructor from a file"""
+		print(cls)
+		times, values = numpy.loadtxt(file_path, unpack=True)
+		# We call the constructor of ’cls’ which is our LabData
+		# This is not a ’real’ constructor, we need to return the object!
+		return cls(times, values)
+
+# We call the alternate constructor from the class itself, not from an instance!
+lab_data = LabData.from_file(’snippets/data/measurements.txt’)
+print(lab_data.values)
+\end{minted}
 
 \paragraph{Metodo Statico.} Lo \mintinline{python}{staticmethod} è un metodo che non riceve la classe o l'istanza come primo argomento; per questo motivo non altera lo stato della classe. In qualche senso un metodo statico è accoppiato alla classe in maniera vaga, è definito nella classe per convenienza ma potrebbe essere definito anche altrove.
+Ad esempio:
+
+\begin{minted}{python}
+import math
+class Angle:
+	# A bunch of useful methods....
+	@staticmethod
+	def rad2deg(rad):
+		# No self argument here
+		return rad * 180./math.pi
+
+	@staticmethod
+	def deg2rad(deg):
+		# No self argument here
+		return deg * math.pi / 180.
+
+print(Angle.rad2deg(math.pi/2))
+print(Angle.deg2rad(45.))
+\end{minted}
 
 \paragraph{Passare argomenti ad un decoratore.} Per creare un decoratore che accetti argomenti, bisogna aggiungere un altro livello: la funzione \textit{decorator factory}. In pratica si hanno tre livelli:
 \begin{itemize}
@@ -771,8 +860,48 @@ Un \textbf{decoratore} ha semplicemente il nome del \textit{wrapper} con un \tex
 	\item il decoratore che prende come input una funzione e ritorna il \textit{wrapper};
 	\item il \textit{wrapper} che implementa le funzionalità aggiuntive; di solito prende come input gli stessi parametri del decoratore e del \textit{wrapper}, e ritorna il suo risultato.
 \end{itemize}
+Per essere più chiari, questo è come dovrebbe funzionare:
+\begin{minted}{python}
+from functools import wraps
 
-% todo finisci qua le cose di codice, mentre la parte di ottimizzazione mi sembra banale
+# This is how a generic decorator with arguments looks like
+
+def decorator_factory(*params): # The signature can be anything
+	def decorator(function):
+		@wraps(function)
+		def wrapper(*args, **kwargs):
+			print(f’Decorator arguments: {params}’)
+			# some preprocess here
+			result = function(*args, **kwargs)
+			# some post-process here
+			return result
+		return wrapper
+	return decorator
+
+# usage
+@decorator_factory(1, 2, 3)
+def f(x):
+	return x**2
+
+f(5)
+\end{minted}
+
+Gli effetti si possono incatenare, ad esempio:
+
+\begin{minted}{python}
+from decorator_samples import clocked, repeat, print_function_info
+
+""" To chain the effect of more than one decorator just stack them above the
+function definition """
+
+@print_function_info
+@repeat(num_times=3)
+@clocked
+def greet(name):
+	print(f’Hello {name}’)
+
+greet(’Bob’)
+\end{minted}
 
 \subsection{Ottimizzazione}
 
@@ -823,4 +952,3 @@ Gli strumenti utilizzati in generale per fare ottimizzazione sarebbe:
 }
 
 \textbf{ATTENZIONE!} Qua fa un esercizio con il \emph{Julia set}, tratto dal libro \textit{High Performance Python}, pubblicato per O'Reilly.
-
