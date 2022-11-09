@@ -1569,30 +1569,30 @@ Una cosa a cui fare attenzione è che definendo una variabile libera dentro una 
 
 Invece di 
 \begin{minted}{python}
-def running_average():
-	total_count = 0
-	num_elements = 0
-	def accumulator(value):
-		total_count += value # Doesn’t work! total_count is reassigned!
-		num_elements += 1 # Doesn’t work! total_count is reassigned!
-		return total_count/num_elements
+def running_average():
+	total_count = 0
+	num_elements = 0
+	def accumulator(value):
+		total_count += value # Doesn’t work! total_count is reassigned!
+		num_elements += 1 # Doesn’t work! total_count is reassigned!
+		return total_count/num_elements
 	return accumulator
 \end{minted}
 
 uno dovrebbe dichiararli non locali:
 
 \begin{minted}{python}
-def running_average():
-	total_count = 0
-	num_elements = 0
-	def accumulator(value):
-		# We declare the relevant variables as nonlocal
-		nonlocal total_count, num_elements
-		# Now we can assign to them - the variables in the closure will be
-		# modified, as we want!
-		total_count += value
-		num_elements += 1
-		return total_count/num_elements
+def running_average():
+	total_count = 0
+	num_elements = 0
+	def accumulator(value):
+		# We declare the relevant variables as nonlocal
+		nonlocal total_count, num_elements
+		# Now we can assign to them - the variables in the closure will be
+		# modified, as we want!
+		total_count += value
+		num_elements += 1
+		return total_count/num_elements
 	return accumulator
 \end{minted}
 
@@ -1608,41 +1608,140 @@ In genere, si usano funzioni dentro funzioni solo quando si vuole fare un \texti
 
 Per fare un esempio sensato:
 \begin{minted}{python}
-def some_function(a, b):
-	print(’Executing {} x {}’.format(a, b))
-	return a * b
+def some_function(a, b):
+	print(’Executing {} x {}’.format(a, b))
+	return a * b
 
-def add_n_wrapper(func, n): # We take the wrapped function as argument
-	""" This wrapper adds n to the result of the wrapped function"""
-	def wrapper(*args, **kwargs):
+def add_n_wrapper(func, n): # We take the wrapped function as argument
+	""" This wrapper adds n to the result of the wrapped function"""
+	def wrapper(*args, **kwargs):
 		"""We passs the arguments as *arg, **kwargs, 
 		because this is the most general form in Python:
-		we can collect any combination of arguments likethat.
+		we can collect any combination of arguments like that.
 		Note that we have access to both ’func’ and ’n’,
-		as they are storedin the closure of ’wrapper’"""
-		result = func(*args, **kwargs) # Pass the arguments to the wrapped fucntion
-		print(’Adding {}’.format(n))
-		return result + n # Return a modified result in this case
+		as they are stored in the closure of ’wrapper’"""
+		result = func(*args, **kwargs) # Pass the arguments to the wrapped fucntion
+		print(’Adding {}’.format(n))
+		return result + n # Return a modified result in this case
 	return wrapper # From add_n_wrapper we return the wrapper
 \end{minted}
 
 \subsection{Decoratori}
 
-% todo 12/22 adv3
+Per riassegnare la funzione wrappata al suo vecchio nome mantenendo le proprietà nuove, si usa una sintassi chiamata decoratori.
+Un \textbf{decoratore} ha semplicemente il nome del \textit{wrapper} con un \textbf{\@} in cima alla sua dichiarazione.
+
+% todo aggiungi il codice per capire che sta a succedere
+
+\paragraph{Metodi della classe.} Un decoratore particolare è il \mintinline{python}{@classmethod}. È tipo un attributo, non ti serve un'istanza per usarlo: un \textit{classmethod} può accedere agli attributi della classe ma non agli attributi dell'istanza. Serve per creare un costruttore alternativo.
+
+\paragraph{Metodo Statico.} Lo \mintinline{python}{staticmethod} è un metodo che non riceve la classe o l'istanza come primo argomento; per questo motivo non altera lo stato della classe. In qualche senso un metodo statico è accoppiato alla classe in maniera vaga, è definito nella classe per convenienza ma potrebbe essere definito anche altrove.
+
+\paragraph{Passare argomenti ad un decoratore.} Per creare un decoratore che accetti argomenti, bisogna aggiungere un altro livello: la funzione \textit{decorator factory}. In pratica si hanno tre livelli:
+\begin{itemize}
+	\item la \textit{decorator factory} che prende i parametri per il decoratore e produce una funzione;
+	\item il decoratore che prende come input una funzione e ritorna il \textit{wrapper};
+	\item il \textit{wrapper} che implementa le funzionalità aggiuntive; di solito prende come input gli stessi parametri del decoratore e del \textit{wrapper}, e ritorna il suo risultato.
+\end{itemize}
+
+% todo finisci qua le cose di codice, mentre la parte di ottimizzazione mi sembra banale
+
+\subsection{Ottimizzazione}
+
+Per ottimizzazione si intende rendere il codice performante, mentre per \textit{profiling} si intende lo studio dei costi di risorse del tuo codice come funzione del tempo, dell'input e dello stato di esecuzione.
+Il messaggio da portare a casa è che \textbf{l'ottimizzazione prematura è la radice di ogni male}.
+Il corretto modo di fare codice:
+\begin{itemize}
+	\item scrivere codice corretto, leggibile, debuggato, testato e documentato;
+	\item ignorare le performance
+	\item se le performance sono buone, amen; altrimenti profila il codice per trovare dove performa peggio, e a quel punto inizia ad ottimizzare dal problema;
+	\item fai test fino a che non hai una nuova versione.
+\end{itemize}
+
+Per capire cosa dovere ottimizzare, devi sapere più o meno come è fatto un computer. 
+I dati sono processati dalla CPU o dalla GPU. La CPU ha alcune memorie cache, chiamate L1, L2 etc da pochi kB. 
+L1 è sul singolo processore, le altre sono condivise fra vari processori. 
+La connessione fra la cache e la CPU si chiama \textit{bus backside} ed è molto veloce. 
+I dati poi vanno trasferiti dalla RAM alla cache, che avviene grazie al \textit{frontside bus} che è molto più lento del \textit{backend bus}.
+Non solo, è anche più lento se devi recuperare i dati dalla memoria solida.
+
+Ovviamente, per ottimizzare la cosa principale sarebbe fare meno operazioni possibili e quindi usare l'algoritmo ottimale per fare il lavoro.
+Vanno ridotte al massimo le operazioni sulla memoria solida e sulla rete; assicurati che i dati richiesti dalla CPU siano già in cache e non devono essere recuperati dalla RAM.
+Usare la vettorizzazione è sempre meglio, perché fa fare alla CPU molte più operazioni in contemporanea.
+Se il sistema ha più di un processore, prova a mettere il lavoro in parallelo in più possibile.
+
+Cosa va evitato? La CPU usa algoritmi di \textit{branch prediction} e \textit{pipelining} per caricare le istruzioni successive e i dati mentre vengono eseguiti quelli correnti.
+Se questo processo fallisce, si ottengono errori di \textit{branch/cache misses} e un numero di \textit{stalled cycles} nel trasporto dati.
+Inoltre, si dovrebbe cercare di tenere i dati in memoria contigui, così da velocizzare i trasferimenti: questo è perché una lista è peggio di un array. 
+Infine, le allocazioni di memoria sono costose come risorse: il programma si ferma e aspetta che il sistema operativo trovi una locazione di memoria.
+Sulle \textit{context switches} e \textit{cpu migrations} non si può fare molto, sono gestite dal sistema operativo.
+
+Gli strumenti utilizzati in generale per fare ottimizzazione sarebbe:
+{\itshape
+\begin{itemize}
+	\item time profiling:
+	\begin{itemize}
+		\item simple \texttt{print} statements;
+		\item a time measuring decorator;
+		\item the \texttt{timeit} Python module;
+		\item the Unix \texttt{time} utility;
+		\item \texttt{cProfile};
+		\item \texttt{line\_profiler};
+	\end{itemize}
+	\item Bytecode study: \texttt{dis};
+	\item CPU efficiency: \texttt{perf};
+	\item Memory profiling: \texttt{heapy}.
+\end{itemize}
+}
+
+\textbf{ATTENZIONE!} Qua fa un esercizio con il \emph{Julia set}, tratto dal libro \textit{High Performance Python}, pubblicato per O'Reilly.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Parallel Programming}
 
-Qua ci sono le lezioni dei giorni 20, 24, 27, 31 di ottobre.
+Capitolo dedicato alla parallelizzazione del lavoro e all'utilizzo del maggior numero di risorse computazionali nel minor tempo possibile.
+
+\subsection{Lezione 9, giovedì 20 ottobre 2022}
+
+\paragraph{Abstract.} Architettura di Von Neumann. Instruction Level Parallelism: processori superscalari, vettorializzazione e pipelining. Leggi di scaling di Dennard e Moore. Parallelismo a livello di task. Tassonomia di Flynn. Esecuzione concorrenziale. Differenza tra programmazione concurrent e parallelismo. Definizione di Speedup. Legge di Amdhal e legge di Gustafson.
+
+
+
+\subsection{Lezione 10, lunedì 24 ottobre 2022}
+
+\paragraph{Abstract.} Multithreading e Multiprocessing in Python. Vari esempi sull'uso del modulo di multiprocessing: lancio, pool, queue, comunicazione tra processi, sincronizzazione tra processi. Modulo Threading. Confronto tra processi e threads su 2,4,8 processori e confronto con implementazione seriale per un problema di fattorizzazione.
+
+
+
+\subsection{Lezione 11, givedì 27 ottobre 2022}
+
+\paragraph{Abstract.} Introduzione sulle GPU. Definizione della metrica sulla potenza di calcolo. Confronto CPU vs GPU: ambiti di applicazioni e differenze architetturali. Calcolo eterogeneo. Introduzione al modello di programmazione basato su CUDA (nvidia). Cenno sull'utilizzo delle librerie e delle direttive al preprocessore. Esempi sulla struttura di un programma host-device in cuda. Esempi pratici di scrittura di kernel GPU. Somma di vettori come esempio per la gestione delle risorse di parallelizzazione. Discussione della molitplicazioni dei matrici su GPU. Problemi limitati dalla banda e limitati dal calcolo. Uso della shared memory. Brevissimo cenno su alcuni algoritmi classici da poter affrontare con il calcolo parallelo su GPU: Istogrammi e introduzione alle funzioni atomiche; Parallel reduction utilizzando la shared memory e la sincronizzazione; Stencil (convolution) e concetto del filtro con maschera di convoluzione (lasciati sulle slides come esempi da approfondire). 
+
+
+
+\subsection{Lezione 12, lunedì 31 ottobre 2022}
+
+\paragraph{Abstract.} Cenno all'uso colescente della memoria nelle GPU. Introduzione all'uso del modulo pyCUDA. Esercitazione Hands-on: Utilizzo del notebook Jupyter per implementare alcuni esempi sull'uso di GPU in python (attraverso colaboratory). Metodi per l'import di kernel C-CUDA in programmi python. Impiego di Numba per compilare funzioni universali su GPU. Esempi pratici sui decoratori vectorize e guvectorize.
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Machine Learning}
 
+Capitolo dedicato all'introduzione al Machine Learning.
+
+\subsection{Lezione 13, giovedì 3 novembre 2022}
+
+
+
+\subsection{Lezione 14, lunedì 7 novembre 2022}
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{C++}
 
+Ultima parte dedicata allo studio del linguaggio C.
 
 
 \end{document}
